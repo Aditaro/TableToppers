@@ -1,0 +1,10 @@
+.DS_Store
+.idea/.gitignore
+.idea/misc.xml
+.idea/modules.xml
+.idea/TableToppers.iml
+.idea/vcs.xml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/inspectionProfiles/Project_Default.xml
+frontend/node_modules/
+frontend/.angular/

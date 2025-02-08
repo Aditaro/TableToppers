@@ -10,6 +10,7 @@ import {
 import { Injectable, NgModule } from '@angular/core';
 import { environment } from '../environments/environment';
 import { Observable } from 'rxjs';
+import { NewRestaurantComponent } from './new-restaurant/new-restaurant.component';
 
 @Injectable({ providedIn: 'root' })
 export class TranslocoHttpLoader implements TranslocoLoader {
@@ -34,6 +35,12 @@ export class TranslocoHttpLoader implements TranslocoLoader {
       }),
     },
     { provide: TRANSLOCO_LOADER, useClass: TranslocoHttpLoader },
+  ],
+  declarations: [
+    
+  ],
+  imports: [
+    NewRestaurantComponent,
   ],
 })
 export class TranslocoRootModule {}
