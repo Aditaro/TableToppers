@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { RestaurantService } from '../services/restaurant.service';
 import { RestaurantCreate } from '../models/restaurant.model';
 
@@ -30,7 +31,9 @@ export class NewRestaurantComponent {
 
   constructor(
     private fb: FormBuilder,
-    private restaurantService: RestaurantService
+    private restaurantService: RestaurantService,
+    public dialogRef: MatDialogRef<NewRestaurantComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.restaurantForm = this.fb.group({
       name: ['', Validators.required],
@@ -70,6 +73,7 @@ export class NewRestaurantComponent {
         alert(`Restaurant "${created?.name}" created successfully!`);
         this.restaurantForm.reset();
         this.selectedFile = null;
+        this.dialogRef.close(true); // Close the dialog and pass true to indicate success
       },
       error: (err) => {
         console.error('Failed to create restaurant:', err);

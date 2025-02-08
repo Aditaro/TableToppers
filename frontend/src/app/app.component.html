@@ -1,7 +1,8 @@
-<h1>TableTopper</h1>
-<nav>
-  <a routerLink="/">Home</a>
-  <a routerLink="/new-restaurant">New Restaurant</a>
-</nav>
+<mat-toolbar color="primary">
+  <span>TableTopper</span>
+  <span class="spacer"></span>
+  <a mat-button routerLink="/">Home</a>
+  <a mat-button routerLink="/restaurants">Restaurants</a>
+</mat-toolbar>
 
-<router-outlet />
+<router-outlet></router-outlet>

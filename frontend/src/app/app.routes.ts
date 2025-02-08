@@ -1,7 +1,8 @@
 import { Routes } from '@angular/router';
 import { NewRestaurantComponent } from './new-restaurant/new-restaurant.component';
+import { RestaurantsComponent } from './restaurants/restaurants.component';
 
 export const routes: Routes = [
-    { path: '', redirectTo: 'new-restaurant', pathMatch: 'full' },
-    { path: 'new-restaurant', component: NewRestaurantComponent }
+    { path: '', redirectTo: 'restaurants', pathMatch: 'full' },
+    { path: 'restaurants', component: RestaurantsComponent }
 ];

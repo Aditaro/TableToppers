@@ -11,6 +11,7 @@ import { Injectable, NgModule } from '@angular/core';
 import { environment } from '../environments/environment';
 import { Observable } from 'rxjs';
 import { NewRestaurantComponent } from './new-restaurant/new-restaurant.component';
+import { RestaurantsComponent } from './restaurants/restaurants.component';
 
 @Injectable({ providedIn: 'root' })
 export class TranslocoHttpLoader implements TranslocoLoader {
@@ -27,9 +28,7 @@ export class TranslocoHttpLoader implements TranslocoLoader {
     {
       provide: TRANSLOCO_CONFIG,
       useValue: translocoConfig({
-        availableLangs: ['de', 'en'],
-        defaultLang: 'de',
-        // Remove this option if your application doesn't support changing language in runtime.
+        availableLangs: ['en'],
         reRenderOnLangChange: true,
         prodMode: environment.production,
       }),
@@ -41,6 +40,7 @@ export class TranslocoHttpLoader implements TranslocoLoader {
   ],
   imports: [
     NewRestaurantComponent,
+    RestaurantsComponent
   ],
 })
 export class TranslocoRootModule {}
