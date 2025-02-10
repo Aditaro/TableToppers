@@ -1,0 +1,955 @@
+openapi: 3.0.0
+servers:
+  - description: Table Toppers
+    url: https://localhost
+info:
+  description: This is a API for Table Toppers
+  version: 0.0.1
+  title: Table Toppers API
+tags:
+  - name: Auth
+    description: Endpoints for user authentication and registration
+  - name: Restaurants
+    description: Endpoints for managing restaurant information
+  - name: Tables
+    description: Endpoints for managing tables within a restaurant
+  - name: Reservations
+    description: Endpoints for managing reservations
+  - name: Menu
+    description: Endpoints for managing the restaurant's menu
+  - name: Waitlist
+    description: Endpoints for managing walk-ins and digital waitlist
+
+paths:
+
+  ###################
+  # AUTHENTICATION  #
+  ###################
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user (customer)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegister'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Bad request (invalid data)
+        '409':
+          description: Conflict (username/email exists)
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login for existing user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Unauthorized (invalid credentials)
+
+  /auth/info:
+    get:
+      tags: [Auth]
+      summary: Retrieve current logged-in user details
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized (not logged in)
+
+  ###################
+  # RESTAURANTS     #
+  ###################
+  /restaurants:
+    get:
+      tags: [Restaurants]
+      summary: Retrieve a list of restaurants (For restaurant side, it should by default return restaurants under the user)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: city
+          schema:
+            type: string
+          description: Filter restaurants by city
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: Partial match for restaurant name
+      responses:
+        '200':
+          description: List of restaurants
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Restaurant'
+        '403':
+          description: Forbidden (only for registered user)
+    post:
+      tags: [Restaurants]
+      summary: Create a new restaurant (management only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestaurantCreate'
+      responses:
+        '201':
+          description: Created restaurant
+        '403':
+          description: Forbidden (only for managers or admin)
+
+  /restaurants/{restaurantId}:
+    get:
+      tags: [Restaurants]
+      summary: Get a single restaurant by ID
+      parameters:
+        - in: path
+          name: restaurantId
+          schema:
+            type: string
+          required: true
+          description: The ID of the restaurant to retrieve
+      responses:
+        '200':
+          description: Restaurant details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Restaurant'
+        '404':
+          description: Restaurant not found
+    put:
+      tags: [Restaurants]
+      summary: Update a restaurant (management only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: restaurantId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestaurantUpdate'
+      responses:
+        '200':
+          description: Updated restaurant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Restaurant'
+        '403':
+          description: Forbidden (only for managers or admin)
+        '404':
+          description: Restaurant not found
+    delete:
+      tags: [Restaurants]
+      summary: Delete a restaurant (management only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: restaurantId
+          schema:
+            type: string
+          required: true
+      responses:
+        '204':
+          description: Restaurant deleted
+        '403':
+          description: Forbidden (only for managers or admin)
+        '404':
+          description: Restaurant not found
+
+  ###################
+  # TABLES          #
+  ###################
+  /restaurants/{restaurantId}/tables:
+    get:
+      tags: [Tables]
+      summary: Get all tables for a restaurant
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: restaurantId
+          required: true
+          schema:
+            type: string
+          description: Restaurant ID
+      responses:
+        '200':
+          description: List of tables
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Table'
+        '403':
+          description: Forbidden
+        '404':
+          description: Restaurant not found
+    post:
+      tags: [Tables]
+      summary: Create a new table in a restaurant (management or staff only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: restaurantId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableCreate'
+      responses:
+        '201':
+          description: Created table
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+        '403':
+          description: Forbidden
+        '404':
+          description: Restaurant not found
+
+  /restaurants/{restaurantId}/tables/{tableId}:
+    get:
+      tags: [Tables]
+      summary: Get details of a specific table
+      parameters:
+        - in: path
+          name: restaurantId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: tableId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Table details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+        '404':
+          description: Table or Restaurant not found
+    put:
+      tags: [Tables]
+      summary: Update a table (management or staff only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: restaurantId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: tableId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableUpdate'
+      responses:
+        '200':
+          description: Updated table
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+        '403':
+          description: Forbidden
+        '404':
+          description: Table or Restaurant not found
+    delete:
+      tags: [Tables]
+      summary: Delete a table (management only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: restaurantId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: tableId
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Table deleted
+        '403':
+          description: Forbidden
+        '404':
+          description: Table or Restaurant not found
+
+  ###################
+  # RESERVATIONS    #
+  ###################
+  /restaurants/{restaurantId}/reservations:
+    get:
+      tags: [Reservations]
+      summary: Get all reservations for a restaurant
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: restaurantId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: date
+          schema:
+            type: string
+            format: date
+          description: Filter by reservation date
+      responses:
+        '200':
+          description: List of reservations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reservation'
+        '403':
+          description: Forbidden
+        '404':
+          description: Restaurant not found
+    post:
+      tags: [Reservations]
+      summary: Create a new reservation
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: restaurantId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationCreate'
+      responses:
+        '201':
+          description: Created reservation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '400':
+          description: Invalid reservation details
+        '403':
+          description: Forbidden
+        '404':
+          description: Restaurant not found
+
+  /restaurants/{restaurantId}/reservations/{reservationId}:
+    get:
+      tags: [Reservations]
+      summary: Get a single reservation by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: restaurantId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: reservationId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reservation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '403':
+          description: Forbidden
+        '404':
+          description: Reservation not found
+    put:
+      tags: [Reservations]
+      summary: Update a reservation (management or user who made it)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: restaurantId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: reservationId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationUpdate'
+      responses:
+        '200':
+          description: Updated reservation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '403':
+          description: Forbidden
+        '404':
+          description: Reservation or Restaurant not found
+    delete:
+      tags: [Reservations]
+      summary: Cancel a reservation (management or user who made it)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: restaurantId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: reservationId
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Reservation canceled
+        '403':
+          description: Forbidden
+        '404':
+          description: Reservation or Restaurant not found
+
+  ###################
+  # WAITLIST        #
+  ###################
+  /restaurants/{restaurantId}/waitlist:
+    get:
+      tags: [Waitlist]
+      summary: Get the current waitlist for walk-in customers
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: restaurantId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of customers on the waitlist
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WaitlistEntry'
+        '403':
+          description: Forbidden
+        '404':
+          description: Restaurant not found
+    post:
+      tags: [Waitlist]
+      summary: Add a customer to the waitlist (walk-in)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: restaurantId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WaitlistEntryCreate'
+      responses:
+        '201':
+          description: Added to waitlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WaitlistEntry'
+        '403':
+          description: Forbidden
+        '404':
+          description: Restaurant not found
+
+  ###################
+  # MENU            #
+  ###################
+  /restaurants/{restaurantId}/menu:
+    get:
+      tags: [Menu]
+      summary: Get the menu for a restaurant
+      parameters:
+        - in: path
+          name: restaurantId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Restaurant menu
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Menu'
+        '404':
+          description: Restaurant not found
+    post:
+      tags: [Menu]
+      summary: Create or update a restaurant's menu
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: restaurantId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuCreate'
+      responses:
+        '201':
+          description: Menu created/updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Menu'
+        '403':
+          description: Forbidden
+        '404':
+          description: Restaurant not found
+
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    ##########
+    # USERS  #
+    ##########
+    UserRegister:
+      type: object
+      required:
+        - username
+        - password
+        - email
+        - phoneNumber
+        - firstName
+        - lastName
+      properties:
+        username:
+          type: string
+          format: string
+        password:
+          type: string
+          format: password
+          description: Password will be MD5 encoded with timestamp and salt "CEN5035" joined by "|"
+        email:
+          type: string
+          format: email
+        phoneNumber:
+          type: string
+          format: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        timestamp:
+          type: integer
+
+    UserLogin:
+      type: object
+      required:
+        - username
+        - password
+        - timestamp
+      properties:
+        username:
+          type: string
+          description: username/email
+        password:
+          type: string
+          format: password
+          description: Password will be MD5 encoded with timestamp and salt "CEN5035" joined by "|"
+        timestamp:
+          type: integer
+
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT authentication token
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        phoneNumber:
+          type: string
+          format: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+          enum: [customer, staff, manager, admin]
+
+    #####################
+    # RESTAURANT SCHEMA #
+    #####################
+    Restaurant:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [pending, open, closed]
+        name:
+          type: string
+        img:
+          type: string
+          format: uri
+        description:
+          type: string
+        location:
+          type: string
+        phone:
+          type: string
+        openingHours:
+          type: string
+        specialAvailability:
+          type: array
+          description: >-
+            Array of special availability configurations (holidays, private events, etc.)
+          items:
+            $ref: '#/components/schemas/SpecialAvailability'
+
+    RestaurantCreate:
+      type: object
+      required:
+        - name
+        - location
+      properties:
+        name:
+          type: string
+        img:
+          type: string
+          format: uri
+        description:
+          type: string
+        location:
+          type: string
+        phone:
+          type: string
+        openingHours:
+          type: string
+
+    RestaurantUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        location:
+          type: string
+        phone:
+          type: string
+        openingHours:
+          type: string
+        specialAvailability:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpecialAvailability'
+
+    SpecialAvailability:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        reason:
+          type: string
+          description: e.g. "Holiday", "Private Event"
+        status:
+          type: string
+          enum: [open, closed, limited]
+
+    ##########
+    # TABLES #
+    ##########
+    Table:
+      type: object
+      properties:
+        id:
+          type: string
+        restaurantId:
+          type: string
+        name:
+          type: string
+        minCapacity:
+          type: integer
+        maxCapacity:
+          type: integer
+        status:
+          type: string
+          enum: [available, occupied, reserved]
+        x: 
+          type: integer
+        y:
+          type: integer
+
+    TableCreate:
+      type: object
+      required:
+        - minCapacity
+        - maxCapacity
+      properties:
+        name:
+          type: string
+        minCapacity:
+          type: integer
+        maxCapacity:
+          type: integer
+
+    TableUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        minCapacity:
+          type: integer
+        maxCapacity:
+          type: integer
+        status:
+          type: string
+          enum: [available, occupied, reserved]
+        x: 
+          type: integer
+        y:
+          type: integer
+
+    ###############
+    # RESERVATIONS #
+    ###############
+    Reservation:
+      type: object
+      properties:
+        id:
+          type: string
+        restaurantId:
+          type: string
+        userId:
+          type: string
+        tableId:
+          type: string
+        reservationTime:
+          type: string
+          format: date-time
+        numberOfGuests:
+          type: integer
+        status:
+          type: string
+          enum: [pending, confirmed, canceled, completed]
+        phoneNumber:
+          type: string
+
+    ReservationCreate:
+      type: object
+      required:
+        - reservationTime
+        - numberOfGuests
+        - phoneNumber
+      properties:
+        reservationTime:
+          type: string
+          format: date-time
+        numberOfGuests:
+          type: integer
+        phoneNumber:
+          type: string
+
+    ReservationUpdate:
+      type: object
+      properties:
+        tableId:
+          type: string
+        reservationTime:
+          type: string
+          format: date-time
+        numberOfGuests:
+          type: integer
+        status:
+          type: string
+          enum: [pending, confirmed, canceled, completed]
+        phoneNumber:
+          type: string
+
+    ###############
+    # WAITLIST     #
+    ###############
+    WaitlistEntry:
+      type: object
+      properties:
+        id:
+          type: string
+        restaurantId:
+          type: string
+        name:
+          type: string
+        phoneNumber:
+          type: string
+        partySize:
+          type: integer
+        partyAhead:
+          type: integer
+        estimatedWaitTime:
+          type: integer
+          description: Estimated wait time in minutes
+
+    WaitlistEntryCreate:
+      type: object
+      required:
+        - name
+        - phoneNumber
+        - partySize
+      properties:
+        name:
+          type: string
+        phoneNumber:
+          type: string
+        partySize:
+          type: integer
+
+    #########
+    # MENU   #
+    #########
+    Menu:
+      type: object
+      properties:
+        restaurantId:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuItem'
+
+    MenuItem:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        img:
+          type: string
+          format: uri
+        price:
+          type: number
+          format: float
+        category:
+          type: string
+          description: e.g. "Appetizer", "Main Course", "Dessert"
+
+    MenuCreate:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuItem'
