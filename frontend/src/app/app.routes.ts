@@ -7,6 +7,6 @@ export const routes: Route[] = [
     { path: 'home', component: HomeComponent },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
-    { path: '', redirectTo: '/login', pathMatch: 'full' },  // Default route
-    { path: '**', redirectTo: '/login' }
+    { path: '', redirectTo: '/home', pathMatch: 'full' },  // Set default route to home
+    { path: '**', redirectTo: '/home' } 
 ];
