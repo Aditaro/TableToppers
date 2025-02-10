@@ -84,21 +84,28 @@ func main() {
 			Email    string `json:"email"`
 			Password string `json:"password"`
 		}
-
+	
 		if err := c.ShouldBindJSON(&request); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
 			return
 		}
-
-		// Log in the user using Supabase Auth
-		session, err := client.Auth.SignInWithEmailPassword(request.Email, request.Password) // Correct method
+	
+		session, err := client.Auth.SignIn(types.SignInRequest{
+			Email:    request.Email,
+			Password: request.Password,
+		})
+	
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
-
-		c.JSON(http.StatusOK, gin.H{"message": "Login successful", "session": session})
+	
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Login successful",
+			"session": session,
+		})
 	})
+	
 
 	// Route for a blank homepage for now
 	router.GET("/home", func(c *gin.Context) {
