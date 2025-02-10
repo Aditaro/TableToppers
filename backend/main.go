@@ -32,12 +32,12 @@ func initSupabase() (*supabase.Client, error) {
 	return client, nil
 }
 
-// Reservation struct for table booking
-type Reservation struct {
-	CustomerID string `json:"customer_id"`
-	Date       string `json:"date"`
-	Day        string `json:"day"`
-	Time       string `json:"time"`
+// Restaurant struct to store restaurant details
+type Restaurant struct {
+	ID          string `json:"id"`          // Unique restaurant ID
+	Name        string `json:"name"`        // Name of the restaurant
+	OwnerID     string `json:"owner_id"`    // Owner's ID
+	TotalTables int    `json:"total_tables"`// Number of tables available
 }
 
 func main() {
@@ -56,53 +56,20 @@ func main() {
 	// Enable CORS
 	router.Use(cors.Default())
 
-	// POST route to register a new user
-	router.POST("/register", func(c *gin.Context) {
-		// Registration logic...
-	})
+	// GET route to fetch the list of restaurants
+	router.GET("/restaurants", func(c *gin.Context) {
+		var restaurants []Restaurant
 
-	// POST route to log in an existing user
-	router.POST("/login", func(c *gin.Context) {
-		// Login logic...
-	})
-
-	// POST route to reserve a table
-	router.POST("/reserve", func(c *gin.Context) {
-		var reservation Reservation
-
-		// Parse incoming request
-		if err := c.ShouldBindJSON(&reservation); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
-			return
-		}
-
-		// Validate reservation fields
-		if reservation.Date == "" || reservation.Day == "" || reservation.Time == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Date, day, and time are required"})
-			return
-		}
-
-		// Example: Simulate saving to Supabase (use actual database insert in production)
-		_, err := client.From("reservations").Insert([]interface{}{
-			map[string]interface{}{
-				"customer_id": reservation.CustomerID,
-				"date":        reservation.Date,
-				"day":         reservation.Day,
-				"time":        reservation.Time,
-			},
-		})
+		// Fetch all restaurants from Supabase
+		err := client.From("restaurants").Select("*").Execute(&restaurants)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save reservation"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch restaurants"})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "Reservation successful", "reservation": reservation})
-	})
-
-	// Route for a blank homepage
-	router.GET("/home", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"message": "Welcome to the homepage!"})
+		// Return the list of restaurants
+		c.JSON(http.StatusOK, gin.H{"restaurants": restaurants})
 	})
 
 	// Start server
