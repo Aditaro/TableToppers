@@ -7,15 +7,8 @@ import { Router } from '@angular/router';
   selector: 'app-login',
   standalone: true,
   imports: [FormsModule],
-  template: `
-    <form (submit)="onLogin()">
-      <label>Email:</label>
-      <input type="email" [(ngModel)]="email" name="email" required />
-      <label>Password:</label>
-      <input type="password" [(ngModel)]="password" name="password" required />
-      <button type="submit">Login</button>
-    </form>
-  `,
+  templateUrl: './login.component.html',
+  styleUrl: './login.component.css',
 })
 export class LoginComponent {
   email = '';

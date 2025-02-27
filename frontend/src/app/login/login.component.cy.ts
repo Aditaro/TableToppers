@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { LoginComponent } from './login.component';
+import {NewRestaurantComponent} from '../new-restaurant/new-restaurant.component';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -17,7 +18,7 @@ describe('LoginComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+  it('should mount', () => {
+    cy.mount(LoginComponent)
+  })
 });
