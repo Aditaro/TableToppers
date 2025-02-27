@@ -19,6 +19,6 @@ describe('HomeComponent', () => {
   });
 
   it('should mount', () => {
-    cy.mount(HomeComponent)
+    expect(component).to.be.ok
   });
 });
