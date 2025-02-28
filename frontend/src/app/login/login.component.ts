@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import {UserService} from '../services/user.service';
+import {environment} from '../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -14,21 +16,24 @@ export class LoginComponent {
   email = '';
   password = '';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient,
+              private router: Router,
+              private userService: UserService) {}
 
   onLogin() {
     console.log('Logging in with:', this.email, this.password);
 
     // Send the login request to the backend
     this.http
-      .post('http://localhost:8080/login', {
+      .post(`${environment.apiBaseUrl}/auth/login`, {
         email: this.email,
         password: this.password,
       })
       .subscribe({
-        next: (response) => {
+        next: (response: any) => {
           console.log('Login successful:', response);
           // Handle successful login (TODO: implement navigate to user's homepage)
+          localStorage.setItem('user', JSON.stringify(response.user));
           this.router.navigate(['/']);
         },
         error: (error) => {
