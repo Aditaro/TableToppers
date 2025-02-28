@@ -9,10 +9,10 @@
       <input matInput placeholder="Enter name" [(ngModel)]="nameFilter" />
     </mat-form-field>
 
-    <button type="submit" (click)="onSearch()">
+    <button type="submit" (click)="onSearch()" id="search-btn">
       Search
     </button>
-    <button type="submit" (click)="openNewRestaurantDialog()">
+    <button *ngIf="user.role === 'manager' || user.role === 'admin'" type="submit" (click)="openNewRestaurantDialog()" id="new-restaurant-btn">
       Add New Restaurant
     </button>
   </div>

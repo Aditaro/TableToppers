@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -9,6 +9,7 @@ import { Restaurant } from 'src/app/models/restaurant.model';
 import { RestaurantService } from 'src/app/services/restaurant.service';
 import { NewRestaurantComponent } from '../new-restaurant/new-restaurant.component';
 import { MatDialog } from '@angular/material/dialog';
+import {User} from '../models/user.model';
 
 @Component({
   selector: 'app-restaurants',
@@ -25,15 +26,21 @@ import { MatDialog } from '@angular/material/dialog';
       MatButtonModule
     ]
 })
-export class RestaurantsComponent {
+export class RestaurantsComponent{
   cityFilter = '';
   nameFilter = '';
+  user: User;
   restaurants: Restaurant[] = [];
 
   constructor(private restaurantService: RestaurantService, public dialog: MatDialog) { }
 
   ngOnInit(): void {
     this.fetchRestaurants();
+    this.fetchUser();
+  }
+
+  fetchUser(): void {
+    this.user = JSON.parse(localStorage.getItem('user'));
   }
 
   fetchRestaurants(): void {
