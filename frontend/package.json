@@ -107,8 +107,7 @@
     "prettier": "^3.4.2",
     "source-map-explorer": "^2.5.3",
     "storybook": "^8.5.0",
-    "ts-node": "~10.9.2",
-    "typescript": "5.5.4"
+    "ts-node": "~10.9.2"
   },
   "lint-staged": {
     "*.{js,json,css,scss,less,md,ts,html,component.html}": [
