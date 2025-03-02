@@ -9,6 +9,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/supabase-community/gotrue-go/types"
 	"github.com/supabase-community/supabase-go"
 )
 
@@ -24,20 +25,13 @@ func initSupabase() (*supabase.Client, error) {
 	url := os.Getenv("SUPABASE_URL")
 	anonKey := os.Getenv("SUPABASE_ANON_KEY")
 
+	// Initialize the Supabase client
 	client, err := supabase.NewClient(url, anonKey, &supabase.ClientOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("error creating Supabase client: %v", err)
 	}
 
 	return client, nil
-}
-
-// Restaurant struct to store restaurant details
-type Restaurant struct {
-	ID          string `json:"id"`          // Unique restaurant ID
-	Name        string `json:"name"`        // Name of the restaurant
-	OwnerID     string `json:"owner_id"`    // Owner's ID
-	TotalTables int    `json:"total_tables"`// Number of tables available
 }
 
 func main() {
@@ -53,23 +47,62 @@ func main() {
 	// Create a new Gin router
 	router := gin.Default()
 
-	// Enable CORS
+	// Enable CORS with default settings (allow all origins)
 	router.Use(cors.Default())
 
-	// GET route to fetch the list of restaurants
-	router.GET("/restaurants", func(c *gin.Context) {
-		var restaurants []Restaurant
+	// POST route to register a new user
+	router.POST("/register", func(c *gin.Context) {
+		var request struct {
+			Email    string `json:"email"`
+			Password string `json:"password"`
+		}
 
-		// Fetch all restaurants from Supabase
-		err := client.From("restaurants").Select("*").Execute(&restaurants)
-
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch restaurants"})
+		if err := c.ShouldBindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 			return
 		}
 
-		// Return the list of restaurants
-		c.JSON(http.StatusOK, gin.H{"restaurants": restaurants})
+		// Create a SignupRequest struct to pass to Signup function
+		signupReq := types.SignupRequest{
+			Email:    request.Email,
+			Password: request.Password,
+		}
+
+		// Registration using Supabase Auth
+		_, err := client.Auth.Signup(signupReq)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
+	})
+
+	// POST route to log in an existing user
+	router.POST("/login", func(c *gin.Context) {
+		var request struct {
+			Email    string `json:"email"`
+			Password string `json:"password"`
+		}
+
+		if err := c.ShouldBindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+			return
+		}
+
+		// Log in the user using Supabase Auth
+		session, err := client.Auth.SignInWithEmailPassword(request.Email, request.Password) // Correct method
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Login successful", "session": session})
+	})
+
+	// Route for a blank homepage for now
+	router.GET("/home", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"message": "Welcome to the homepage!"})
 	})
 
 	// Start server

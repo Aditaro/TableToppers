@@ -1,12 +1,14 @@
 import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterModule } from '@angular/router';
+import { TranslocoRootModule } from './transloco-root.module';
+import { MatToolbarModule } from '@angular/material/toolbar';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [RouterModule],
-  template: `
-    <router-outlet></router-outlet>
-  `,
+    selector: 'app-root',
+    imports: [RouterOutlet, RouterLink, TranslocoRootModule, MatToolbarModule, RouterModule],
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.scss'
 })
-export class AppComponent {}
+export class AppComponent {
+  title = 'Table Topper!';
+}

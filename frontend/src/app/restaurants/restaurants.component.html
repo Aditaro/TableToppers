@@ -1,0 +1,45 @@
+<div class="filter-container">
+    <mat-form-field appearance="fill">
+      <mat-label>City</mat-label>
+      <input matInput placeholder="Enter city" [(ngModel)]="cityFilter" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Name</mat-label>
+      <input matInput placeholder="Enter name" [(ngModel)]="nameFilter" />
+    </mat-form-field>
+
+    <button type="submit" (click)="onSearch()">
+      Search
+    </button>
+    <button type="submit" (click)="openNewRestaurantDialog()">
+      Add New Restaurant
+    </button>
+  </div>
+
+  <div class="restaurants-container">
+    <mat-card *ngFor="let restaurant of restaurants" class="restaurant-card">
+      <mat-card-header>
+        <mat-card-title>{{ restaurant.name }}</mat-card-title>
+        <mat-card-subtitle>
+          {{ restaurant.location }} | Status: {{ restaurant.status }}
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <img mat-card-image [src]="restaurant.img" alt="{{ restaurant.name }}" />
+
+      <mat-card-content>
+        <p>{{ restaurant.description }}</p>
+        <p><strong>Phone:</strong> {{ restaurant.phone }}</p>
+        <p><strong>Opening Hours:</strong> {{ restaurant.openingHours }}</p>
+        <div *ngIf="restaurant.specialAvailability?.length">
+          <strong>Special Availability:</strong>
+          <ul>
+            <li *ngFor="let availability of restaurant.specialAvailability">
+              {{ availability.date }} - {{ availability.reason }} ({{ availability.status }})
+            </li>
+          </ul>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>

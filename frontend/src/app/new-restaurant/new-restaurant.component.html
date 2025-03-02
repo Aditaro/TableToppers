@@ -1,0 +1,55 @@
+<mat-card>
+    <mat-card-title>Create New Restaurant</mat-card-title>
+    <mat-card-content>
+      <form [formGroup]="restaurantForm" (ngSubmit)="onSubmit()">
+
+        <!-- Name (required) -->
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" required placeholder="e.g. The Great Eats" />
+        </mat-form-field>
+
+        <!-- Location (required) -->
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Location</mat-label>
+          <input matInput formControlName="location" required placeholder="e.g. 123 Food Street" />
+        </mat-form-field>
+
+        <!-- Description -->
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="3" placeholder="Short description"></textarea>
+        </mat-form-field>
+
+        <!-- Phone -->
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Phone</mat-label>
+          <input matInput formControlName="phone" placeholder="(555) 123-4567" />
+        </mat-form-field>
+
+        <!-- Opening Hours -->
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Opening Hours</mat-label>
+          <input matInput formControlName="openingHours" placeholder="e.g. Mon-Fri: 9 AM - 9 PM" />
+        </mat-form-field>
+
+        <!-- File input for the image -->
+        <div class="file-upload">
+          <label for="restaurantImage">Restaurant Image</label>
+          <input
+            id="restaurantImage"
+            type="file"
+            accept="image/*"
+            (change)="onFileSelected($event)"
+          />
+        </div>
+
+        <button
+          type="submit"
+          [disabled]="restaurantForm.invalid"
+        >
+          Create Restaurant
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
