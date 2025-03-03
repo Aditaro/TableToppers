@@ -19,27 +19,28 @@
 
   <div class="restaurants-container">
     <mat-card *ngFor="let restaurant of restaurants" class="restaurant-card">
-      <mat-card-header>
-        <mat-card-title>{{ restaurant.name }}</mat-card-title>
-        <mat-card-subtitle>
-          {{ restaurant.location }} | Status: {{ restaurant.status }}
-        </mat-card-subtitle>
-      </mat-card-header>
+      <a [routerLink]="['/restaurants', restaurant.id, 'tables']">
+        <mat-card-header>
+          <mat-card-title>{{ restaurant.name }}</mat-card-title>
+          <mat-card-subtitle>
+            {{ restaurant.location }} | Status: {{ restaurant.status }}
+          </mat-card-subtitle>
+        </mat-card-header>
+        <img mat-card-image [src]="restaurant.img" alt="{{ restaurant.name }}" />
 
-      <img mat-card-image [src]="restaurant.img" alt="{{ restaurant.name }}" />
-
-      <mat-card-content>
-        <p>{{ restaurant.description }}</p>
-        <p><strong>Phone:</strong> {{ restaurant.phone }}</p>
-        <p><strong>Opening Hours:</strong> {{ restaurant.openingHours }}</p>
-        <div *ngIf="restaurant.specialAvailability?.length">
-          <strong>Special Availability:</strong>
-          <ul>
-            <li *ngFor="let availability of restaurant.specialAvailability">
-              {{ availability.date }} - {{ availability.reason }} ({{ availability.status }})
-            </li>
-          </ul>
-        </div>
-      </mat-card-content>
+        <mat-card-content>
+          <p>{{ restaurant.description }}</p>
+          <p><strong>Phone:</strong> {{ restaurant.phone }}</p>
+          <p><strong>Opening Hours:</strong> {{ restaurant.openingHours }}</p>
+          <div *ngIf="restaurant.specialAvailability?.length">
+            <strong>Special Availability:</strong>
+            <ul>
+              <li *ngFor="let availability of restaurant.specialAvailability">
+                {{ availability.date }} - {{ availability.reason }} ({{ availability.status }})
+              </li>
+            </ul>
+          </div>
+        </mat-card-content>
+      </a>
     </mat-card>
   </div>

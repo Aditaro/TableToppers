@@ -10,6 +10,7 @@ import { RestaurantService } from 'src/app/services/restaurant.service';
 import { NewRestaurantComponent } from '../new-restaurant/new-restaurant.component';
 import { MatDialog } from '@angular/material/dialog';
 import {User} from '../models/user.model';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-restaurants',
@@ -17,14 +18,15 @@ import {User} from '../models/user.model';
 
   templateUrl: './restaurants.component.html',
   styleUrl: './restaurants.component.css',
-    imports: [
-      CommonModule,
-      FormsModule,
-      MatCardModule,
-      MatFormFieldModule,
-      MatInputModule,
-      MatButtonModule
-    ]
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    RouterLink
+  ]
 })
 export class RestaurantsComponent{
   cityFilter = '';
