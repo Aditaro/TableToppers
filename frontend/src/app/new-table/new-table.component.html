@@ -1,0 +1,24 @@
+<mat-card>
+    <mat-card-title>Create New Table</mat-card-title>
+    <mat-card-content>
+      <form [formGroup]="tableForm">
+        <mat-form-field appearance="fill" style="width: 100%;">
+          <mat-label>Table Name</mat-label>
+          <input matInput formControlName="name">
+        </mat-form-field>
+        <mat-form-field appearance="fill" style="width: 100%;">
+          <mat-label>Min Capacity</mat-label>
+          <input matInput type="number" formControlName="minCapacity">
+        </mat-form-field>
+        <mat-form-field appearance="fill" style="width: 100%;">
+          <mat-label>Max Capacity</mat-label>
+          <input matInput type="number" formControlName="maxCapacity">
+        </mat-form-field>
+      </form>
+    </mat-card-content>
+    <div mat-dialog-actions align="end">
+      <button mat-button color="primary" [disabled]="!tableForm.valid" (click)="onSave()">Save</button>
+      <button *ngIf="data.isEdit" mat-button color="warn" (click)="onDelete()">Delete</button>
+      <button mat-button (click)="onCancel()">Cancel</button>
+    </div>
+  </mat-card>

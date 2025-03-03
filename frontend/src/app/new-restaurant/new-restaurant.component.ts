@@ -66,7 +66,6 @@ export class NewRestaurantComponent {
       img: this.selectedFile || undefined
     };
 
-    // Perform the POST request
     this.restaurantService.createRestaurant(restaurant).subscribe({
       next: (created) => {
         console.log('Restaurant created successfully:', created);

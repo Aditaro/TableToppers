@@ -2,20 +2,14 @@ import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import {environment} from '../../environments/environment';
 
 @Component({
   selector: 'app-register',
   standalone: true,
   imports: [FormsModule],
-  template: `
-    <form (submit)="onRegister()">
-      <label>Email:</label>
-      <input type="email" [(ngModel)]="email" name="email" required />
-      <label>Password:</label>
-      <input type="password" [(ngModel)]="password" name="password" required />
-      <button type="submit">Register</button>
-    </form>
-  `,
+  templateUrl: `./register.component.html`,
+  styleUrl: `./register.component.css`,
 })
 export class RegisterComponent {
   email = '';
@@ -28,7 +22,7 @@ export class RegisterComponent {
 
     // Send the registration request to the backend
     this.http
-      .post('http://localhost:8080/register', {
+      .post(`${environment.apiBaseUrl}/register`, {
         email: this.email,
         password: this.password,
       })
