@@ -122,8 +122,10 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
   providedIn: 'root'
 })
 export class RestaurantService {
-  private supabaseUrl = process.env.SUPABASE_URL as string;
-  private supabaseApiKey = process.env.SUPABASE_API_KEY as string;
+  // private supabaseUrl = process.env.SUPABASE_URL as string;
+  // private supabaseApiKey = process.env.SUPABASE_API_KEY as string;
+  private supabaseUrl = "https://qhonlkzyqqvrydrcspni.supabase.co"
+  private supabaseApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFob25sa3p5cXF2cnlkcmNzcG5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg3MTI1NzUsImV4cCI6MjA1NDI4ODU3NX0.YElVm6BHwziYzg2CJkZe-raT4B0doW4GQCvrxwWLlXU"
   
   private headers = new HttpHeaders({
     'apikey': this.supabaseApiKey,
@@ -153,17 +155,18 @@ export class RestaurantService {
 
   // Add a new restaurant to Supabase
   createRestaurant(data: RestaurantCreate): Observable<any> {
-    const newRestaurant = {
-      name: data.name,
-      location: data.location,
-      description: data.description || '',
-      phone: data.phone || '',
-      opening_hours: data.openingHours || '',
-      img: data.img ? data.img.name : '' // Store image filename (actual upload is separate)
-    };
+  const newRestaurant = {
+    name: data.name,
+    location: data.location,
+    description: data.description || '',
+    phone: data.phone || '',
+    opening_hours: data.openingHours || '',
+    img: data.img || '' // Use img directly
+  };
 
-    return this.http.post(`${this.supabaseUrl}/rest/v1/restaurants`, newRestaurant, { headers: this.headers });
-  }
+  return this.http.post(`${this.supabaseUrl}/rest/v1/restaurants`, newRestaurant, { headers: this.headers });
+}
+
 
   // Upload image to Supabase Storage
   uploadImage(file: File): Observable<any> {
