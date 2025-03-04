@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "animejs": "^3.2.2",
+    "typescript": "^5.8.2"
+  },
+  "devDependencies": {
+    "@types/cypress": "^0.1.6",
+    "@types/mocha": "^10.0.10",
+    "cypress": "^14.1.0"
+  }
+}
