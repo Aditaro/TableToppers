@@ -2,6 +2,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
     "animejs": "^3.2.2",
+    "konva": "^9.3.18",
     "typescript": "^5.8.2"
   },
   "devDependencies": {
