@@ -1,0 +1,9 @@
+<mat-toolbar color="primary">
+  <span>Restaurant Floor Plan</span>
+  <span class="spacer"></span>
+  <button mat-button color="accent" (click)="addNewTable()">Add</button>
+</mat-toolbar>
+<div class="floor-plan-container">
+    <!-- The container for our Konva Stage -->
+    <div #floorPlanHost class="konva-container"></div>
+</div>

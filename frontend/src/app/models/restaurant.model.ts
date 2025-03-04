@@ -23,3 +23,12 @@ export interface Restaurant {
   openingHours: string;
   specialAvailability: SpecialAvailability[];
 }
+
+export interface NewRestaurant {
+  name: string;
+  img: string;
+  description: string;
+  location: string;
+  phone: string;
+  openingHours: string;
+}

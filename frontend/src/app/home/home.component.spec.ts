@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { HomeComponent } from './home.component';
+import {LoginComponent} from '../login/login.component';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
@@ -17,7 +18,7 @@ describe('HomeComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('should mount', () => {
+    expect(component).to.be.ok
   });
 });
