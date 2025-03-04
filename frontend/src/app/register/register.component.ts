@@ -1,15 +1,16 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import {environment} from '../../environments/environment';
 
 @Component({
   selector: 'app-register',
+  templateUrl: './register.component.html',
+  styleUrls: ['./register.component.css'],
   standalone: true,
-  imports: [FormsModule],
-  templateUrl: `./register.component.html`,
-  styleUrl: `./register.component.css`,
+  imports: [FormsModule, RouterLink, CommonModule],
 })
 export class RegisterComponent {
   email = '';
