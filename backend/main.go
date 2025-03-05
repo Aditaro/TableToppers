@@ -46,31 +46,47 @@ func initSupabase() (*supabase.Client, error) {
 }
 
 // Restaurant Image upload
-func uploadImage(client *supabase.Client, fileHeader *multipart.FileHeader) (string, error) {
-	file, err := fileHeader.Open()
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
+// func uploadImage(client *supabase.Client, fileHeader *multipart.FileHeader) (string, error) {
+// 	file, err := fileHeader.Open()
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	defer file.Close()
 
-	var fileBuffer bytes.Buffer
-	_, err = io.Copy(&fileBuffer, file)
-	if err != nil {
-		return "", err
-	}
+// 	var fileBuffer bytes.Buffer
+// 	_, err = io.Copy(&fileBuffer, file)
+// 	if err != nil {
+// 		return "", err
+// 	}
 
-	// Define file path
-	filePath := "restaurants/" + fileHeader.Filename
+// 	// Define file path
+// 	filePath := "restaurants/" + fileHeader.Filename
 
-	// Upload image to Supabase Storage
-	_, err = client.Storage.From("restaurant-images").Upload(filePath, &fileBuffer, "image/jpeg")
-	if err != nil {
-		return "", err
-	}
+// 	// Upload image to Supabase Storage
+// 	_, err = client.Storage.From("restaurant-images").Upload(filePath, &fileBuffer, "image/jpeg")
+// 	if err != nil {
+// 		return "", err
+// 	}
 
-	// Return public URL of the uploaded image
-	return client.Storage.From("restaurant-images").GetPublicURL(filePath), nil
+// 	// Return public URL of the uploaded image
+// 	return client.Storage.From("restaurant-images").GetPublicURL(filePath), nil
+// }
+func uploadImage(file multipart.File, fileHeader *multipart.FileHeader) (string, error) {
+    // Create a client for Supabase storage (replace this with your Supabase client setup)
+    storageClient := supabase.NewClient("YOUR_SUPABASE_URL", "YOUR_SUPABASE_API_KEY")
+    storageBucket := storageClient.Storage.From("restaurant_images")
+
+    // Upload the file to Supabase Storage
+    uploadedFile, err := storageBucket.UploadFile("restaurant_images", file, fileHeader.Filename)
+    if err != nil {
+        return "", err
+    }
+
+    // Return the URL of the uploaded image
+    imgURL := uploadedFile.PublicURL()
+    return imgURL, nil
 }
+
 
 func main() {
 	// Load environment variables
