@@ -11,6 +11,7 @@ import {MatInput} from '@angular/material/input';
 import {MatButton} from '@angular/material/button';
 import {MatDialogActions} from '@angular/material/dialog';
 import { NewReservationComponent } from './new-reservation/new-reservation.component';
+import { ReservationsComponent } from './reservations/reservations.component';
 
 
 @NgModule({
@@ -25,6 +26,7 @@ import { NewReservationComponent } from './new-reservation/new-reservation.compo
     NewRestaurantComponent,
     RestaurantsComponent,
     NewReservationComponent,
+    ReservationsComponent,
     TablesComponent,
     FormsModule,
     MatCard,

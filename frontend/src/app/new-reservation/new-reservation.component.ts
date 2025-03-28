@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators, ValidatorFn } from '@angular/forms';
 import { ReservationService } from '../services/reservation.service';
 import { ActivatedRoute } from '@angular/router';
@@ -8,23 +8,14 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { MatNativeDateModule, provideNativeDateAdapter } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { Router } from '@angular/router';
 import { Restaurant } from '../models/restaurant.model';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-function futureDateValidator(control: AbstractControl): ValidationErrors | null {
-  if (!control.value) {
-    return null;
-  }
-  const selectedDate = new Date(control.value);
-  if (selectedDate.getTime() < new Date().getTime()) {
-    return { pastDate: true };
-  }
-  return null;
-}
 
 @Component({
   selector: 'app-new-reservation',
@@ -40,9 +31,9 @@ function futureDateValidator(control: AbstractControl): ValidationErrors | null 
     MatNativeDateModule,
     MatButtonModule,
     MatSelectModule,
-    NgxMaskDirective
+    NgxMaskDirective,
   ],
-  providers: [provideNgxMask()]
+  providers: [provideNgxMask(), provideNativeDateAdapter()]
 })
 export class NewReservationComponent implements OnInit {
   reservationForm!: FormGroup;
@@ -51,6 +42,8 @@ export class NewReservationComponent implements OnInit {
   timeSlots: string[] = [];
   minDate: Date = new Date();
   specialAvailabilityDates: string[] = [];
+  isEditMode: boolean = false;
+  reservationId: string = '';
 
   dateFilter = (date: Date | null): boolean => {
     if (!date) return false;
@@ -63,16 +56,23 @@ export class NewReservationComponent implements OnInit {
     private reservationService: ReservationService,
     private route: ActivatedRoute,
     private snackBar: MatSnackBar,
-    private router: Router
+    private dialogRef: MatDialogRef<NewReservationComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any
   ) {
-    const navigation = this.router.getCurrentNavigation();
-    this.restaurant = navigation?.extras.state?.['restaurant'];
+    this.restaurant = data?.restaurant;
+    this.restaurantId = data?.restaurantId;
+    this.isEditMode = !!data?.reservation;
+    if (this.isEditMode && data.reservation) {
+      this.reservationId = data.reservation.id;
+    }
   }
 
   ngOnInit(): void {
     this.processRestaurantData();
-    this.restaurantId = this.route.snapshot.paramMap.get('restaurantId') || '';
-    console.log(this.restaurantId);
+    if (!this.restaurantId) {
+      this.restaurantId = this.route.snapshot.paramMap.get('restaurantId') || '';
+    }
+    console.log(this.restaurant);
 
     this.reservationForm = this.fb.group({
       reservationDate: [null, Validators.required],
@@ -81,8 +81,36 @@ export class NewReservationComponent implements OnInit {
       phoneNumber: [null, Validators.required]
     }, { validators: this.dateTimeValidator });
 
+    if (this.isEditMode && this.data.reservation) {
+      this.populateFormWithExistingData();
+    }
+    
     this.reservationForm.get('reservationDate')?.valueChanges.subscribe(date => {
       if (date) this.generateTimeSlots(date);
+    });
+  }
+
+  private populateFormWithExistingData(): void {
+    const reservation = this.data.reservation;
+    if (!reservation) return;
+
+    // Parse the reservation time
+    const reservationDate = new Date(reservation.reservationTime);
+    
+    // Format the time as HH:MM for the time dropdown
+    const hours = reservationDate.getHours().toString().padStart(2, '0');
+    const minutes = reservationDate.getMinutes().toString().padStart(2, '0');
+    const timeString = `${hours}:${minutes}`;
+    
+    // Generate time slots for the selected date to ensure the existing time is available
+    this.generateTimeSlots(reservationDate);
+    
+    // Set form values
+    this.reservationForm.patchValue({
+      reservationDate: reservationDate,
+      reservationTime: timeString,
+      numberOfGuests: reservation.numberOfGuests,
+      phoneNumber: reservation.phoneNumber
     });
   }
 
@@ -98,11 +126,6 @@ export class NewReservationComponent implements OnInit {
     const match = this.restaurant.openingHours.match(timeFormat);
     
     if (!match) return { start: 11, startMinutes: 0, end: 22, endMinutes: 0};
-  
-    const closingHour = parseInt(match[3]);
-    const closingMinute = parseInt(match[4]);
-    // Convert closing time to total minutes
-    const totalClosingMinutes = closingHour * 60 + closingMinute -30;
     
     return {
       start: parseInt(match[1]),
@@ -160,15 +183,29 @@ export class NewReservationComponent implements OnInit {
       phoneNumber: this.reservationForm.value.phoneNumber
     };
 
-    this.reservationService.createReservation(this.restaurantId, reservation).subscribe({
-      next: () => {
-        this.snackBar.open('Reservation successful!', 'Close', { duration: 3000 });
-        this.reservationForm.reset();
-      },
-      error: (err) => {
-        console.error(err);
-        this.snackBar.open('Failed to make reservation', 'Close', { duration: 3000 });
-      }
-    });
+    // Use update or create based on whether we're editing
+    if (this.isEditMode) {
+      this.reservationService.updateReservation(this.restaurantId, this.reservationId, reservation).subscribe({
+        next: () => {
+          this.snackBar.open('Reservation updated successfully!', 'Close', { duration: 3000 });
+          this.dialogRef.close(true);
+        },
+        error: (err) => {
+          console.error(err);
+          this.snackBar.open('Failed to update reservation', 'Close', { duration: 3000 });
+        }
+      });
+    } else {
+      this.reservationService.createReservation(this.restaurantId, reservation).subscribe({
+        next: () => {
+          this.snackBar.open('Reservation successful!', 'Close', { duration: 3000 });
+          this.dialogRef.close(true); 
+        },
+        error: (err) => {
+          console.error(err);
+          this.snackBar.open('Failed to make reservation', 'Close', { duration: 3000 });
+        }
+      });
+    }
   }
 }
