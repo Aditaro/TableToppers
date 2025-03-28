@@ -12,14 +12,19 @@
     <button type="submit" (click)="onSearch()" id="search-btn">
       Search
     </button>
-    <button *ngIf="user.role === 'manager' || user.role === 'admin'" type="submit" (click)="openNewRestaurantDialog()" id="new-restaurant-btn">
+    <button *ngIf="user?.role === 'manager' || user?.role === 'admin'" type="submit" (click)="openNewRestaurantDialog()" id="new-restaurant-btn">
       Add New Restaurant
     </button>
   </div>
 
   <div class="restaurants-container">
     <mat-card *ngFor="let restaurant of restaurants" class="restaurant-card">
-      <a [routerLink]="['/restaurants', restaurant.id, 'tables']">
+      <a [routerLink]="user?.role === 'manager' || user?.role === 'admin'
+                         ? ['/restaurants', restaurant.id, 'tables']
+                         : user?.role === 'customer'
+                           ? ['/restaurants', restaurant.id, 'reserve']
+                           : ['/login']"
+                           [state]="{ restaurant: restaurant }">
         <mat-card-header>
           <mat-card-title>{{ restaurant.name }}</mat-card-title>
           <mat-card-subtitle>
