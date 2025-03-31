@@ -46,6 +46,7 @@ export class RestaurantsComponent{
   }
 
   fetchRestaurants(): void {
+    // Pass the filters to the getRestaurants method
     this.restaurantService.getRestaurants(this.cityFilter, this.nameFilter)
       .subscribe(data => {
         this.restaurants = data;
@@ -53,7 +54,7 @@ export class RestaurantsComponent{
   }
 
   onSearch(): void {
-    this.fetchRestaurants();
+    this.fetchRestaurants();  // Re-fetch restaurants based on updated filters
   }
 
   openNewRestaurantDialog(): void {
@@ -69,3 +70,4 @@ export class RestaurantsComponent{
     });
   }
 }
+
