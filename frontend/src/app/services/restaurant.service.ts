@@ -181,9 +181,10 @@
 
 //new changes
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Restaurant, RestaurantCreate } from '../models/restaurant.model';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import {catchError, Observable, of, throwError} from 'rxjs';
+import {NewRestaurant, Restaurant, RestaurantCreate} from '../models/restaurant.model';
+import {HttpClient, HttpResponse} from '@angular/common/http';
+import {environment} from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
