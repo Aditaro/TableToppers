@@ -32,7 +32,7 @@ func (m *MockAuthClient) SignInWithEmailPassword(email, password string) (*types
 	}
 	return nil, fmt.Errorf("invalid credentials")
 }
-
+// check routes in openapi documenation and reference it here
 func TestRegisterUser(t *testing.T) {
 	// Create a mock Supabase client
 	client := &MockSupabaseClient{

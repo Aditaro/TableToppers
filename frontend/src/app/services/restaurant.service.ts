@@ -113,6 +113,73 @@
 //   }
   
 // }
+
+// second
+// import { Injectable } from '@angular/core';
+// import { Observable } from 'rxjs';
+// import { Restaurant, RestaurantCreate } from '../models/restaurant.model';
+// import { HttpClient, HttpHeaders } from '@angular/common/http';
+
+// @Injectable({
+//   providedIn: 'root'
+// })
+// export class RestaurantService {
+//   // private supabaseUrl = process.env.SUPABASE_URL as string;
+//   // private supabaseApiKey = process.env.SUPABASE_API_KEY as string;
+//   private supabaseUrl = "https://qhonlkzyqqvrydrcspni.supabase.co"
+//   private supabaseApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFob25sa3p5cXF2cnlkcmNzcG5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg3MTI1NzUsImV4cCI6MjA1NDI4ODU3NX0.YElVm6BHwziYzg2CJkZe-raT4B0doW4GQCvrxwWLlXU"
+  
+//   private headers = new HttpHeaders({
+//     'apikey': this.supabaseApiKey,
+//     'Authorization': `Bearer ${this.supabaseApiKey}`,
+//     'Content-Type': 'application/json'
+//   });
+
+//   constructor(private http: HttpClient) {}
+
+//   // Fetch restaurants from Supabase
+//   getRestaurants(city?: string, name?: string): Observable<Restaurant[]> {
+//     // Construct query parameters dynamically based on provided filters
+//     let queryParams = '';
+    
+//     if (city) {
+//       queryParams += `?location=ilike.${city}`;
+//     }
+    
+//     if (name) {
+//       // If city filter is already applied, append `&`, otherwise start with `?`
+//       queryParams += (queryParams ? `&` : `?`) + `name=ilike.${name}`;
+//     }
+  
+//     return this.http.get<Restaurant[]>(`${this.supabaseUrl}/rest/v1/restaurants${queryParams}`, { headers: this.headers });
+//   }
+  
+
+//   // Add a new restaurant to Supabase
+//   createRestaurant(data: RestaurantCreate): Observable<any> {
+//   const newRestaurant = {
+//     name: data.name,
+//     location: data.location,
+//     description: data.description || '',
+//     phone: data.phone || '',
+//     opening_hours: data.openingHours || '',
+//     img: data.img || '' // Use img directly
+//   };
+
+//   return this.http.post(`${this.supabaseUrl}/rest/v1/restaurants`, newRestaurant, { headers: this.headers });
+// }
+
+
+//   // Upload image to Supabase Storage
+//   uploadImage(file: File): Observable<any> {
+//     const formData = new FormData();
+//     formData.append('file', file);
+    
+//     return this.http.post(`${this.supabaseUrl}/storage/v1/object/sign/restaurant_images/${file.name}`, formData, { headers: this.headers });
+//   }
+// }
+
+//new changes
 import { Injectable } from '@angular/core';
 import {catchError, Observable, of, throwError} from 'rxjs';
 import {NewRestaurant, Restaurant, RestaurantCreate} from '../models/restaurant.model';
@@ -123,48 +190,88 @@ import {environment} from '../../environments/environment';
   providedIn: 'root'
 })
 export class RestaurantService {
-  
+  private apiUrl = "http://localhost:8080";  // Replace with your backend API base URL
   private headers = new HttpHeaders({
-    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    // You should dynamically add the authentication token if required
+    'Authorization': `Bearer ${localStorage.getItem('token')}` // Example of token from localStorage
   });
 
   constructor(private http: HttpClient) {}
 
-  // Fetch restaurants from Supabase
+  /**
+   * Fetches a list of restaurants with optional filters for city and name.
+   * @param city Optional city filter.
+   * @param name Optional name filter.
+   * @returns Observable list of restaurants.
+   */
   getRestaurants(city?: string, name?: string): Observable<Restaurant[]> {
-    let url
-    if (city) {
-      url = `${environment.apiBaseUrl}/restaurants?city=${city}`;
-    } else if (name) {
-      url = `${environment.apiBaseUrl}/restaurants?name=${name}`;
-    } else {
-      url = `${environment.apiBaseUrl}/restaurants`;
-    }
-    return this.http.get<Restaurant[]>(url, { headers: this.headers }).pipe(
-      catchError(error => {
-        alert('Get restaurants failed');
-        console.error('Get restaurants failed:', error);
-        return of([]);
-      })
-    );
-  }
-  
+    let queryParams = '';
 
-  createRestaurant(data: RestaurantCreate): Observable<NewRestaurant|null> {
-    // Mock: simply push to local array and return it
-    const newRestaurant: NewRestaurant = {
+    if (city) {
+      queryParams += `?city=${city}`;
+    }
+
+    if (name) {
+      queryParams += queryParams ? `&name=${name}` : `?name=${name}`;
+    }
+
+    return this.http.get<Restaurant[]>(`${this.apiUrl}/restaurants${queryParams}`, { headers: this.headers });
+  }
+
+  /**
+   * Creates a new restaurant.
+   * @param data The data for the new restaurant.
+   * @returns Observable response from the API.
+   */
+  createRestaurant(data: RestaurantCreate): Observable<any> {
+    const restaurantData = {
       name: data.name,
       location: data.location,
+      description: data.description || '',
       phone: data.phone || '',
       openingHours: data.openingHours || '',
-      img: data.img || '',
-      description: data.description || ''
+      img: data.img || ''
     };
-    return this.http.post<NewRestaurant>(`${environment.apiBaseUrl}/restaurants`, newRestaurant, { headers: this.headers }).pipe(
-      catchError(error => {
-        return throwError(() => error)
-      })
-    );
+
+    return this.http.post(`${this.apiUrl}/restaurants`, restaurantData, { headers: this.headers });
+  }
+
+  /**
+   * Fetches a single restaurant by its ID.
+   * @param restaurantId The ID of the restaurant to retrieve.
+   * @returns Observable the restaurant's details.
+   */
+  getRestaurantById(restaurantId: string): Observable<Restaurant> {
+    return this.http.get<Restaurant>(`${this.apiUrl}/restaurants/${restaurantId}`, { headers: this.headers });
+  }
+
+  /**
+   * Updates a restaurant's details.
+   * @param restaurantId The ID of the restaurant to update.
+   * @param data The updated restaurant data.
+   * @returns Observable the updated restaurant.
+   */
+  updateRestaurant(restaurantId: string, data: RestaurantCreate): Observable<Restaurant> {
+    const updatedData = {
+      name: data.name,
+      location: data.location,
+      description: data.description || '',
+      phone: data.phone || '',
+      openingHours: data.openingHours || '',
+      img: data.img || ''
+    };
+
+    return this.http.put<Restaurant>(`${this.apiUrl}/restaurants/${restaurantId}`, updatedData, { headers: this.headers });
+  }
+
+  /**
+   * Deletes a restaurant by its ID.
+   * @param restaurantId The ID of the restaurant to delete.
+   * @returns Observable a response confirming deletion.
+   */
+  deleteRestaurant(restaurantId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/restaurants/${restaurantId}`, { headers: this.headers });
   }
 }
+
