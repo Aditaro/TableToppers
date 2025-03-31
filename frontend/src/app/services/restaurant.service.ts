@@ -114,22 +114,18 @@
   
 // }
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Restaurant, RestaurantCreate } from '../models/restaurant.model';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import {catchError, Observable, of, throwError} from 'rxjs';
+import {NewRestaurant, Restaurant, RestaurantCreate} from '../models/restaurant.model';
+import {HttpClient, HttpResponse} from '@angular/common/http';
+import {environment} from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RestaurantService {
-  // private supabaseUrl = process.env.SUPABASE_URL as string;
-  // private supabaseApiKey = process.env.SUPABASE_API_KEY as string;
-  private supabaseUrl = "https://qhonlkzyqqvrydrcspni.supabase.co"
-  private supabaseApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFob25sa3p5cXF2cnlkcmNzcG5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg3MTI1NzUsImV4cCI6MjA1NDI4ODU3NX0.YElVm6BHwziYzg2CJkZe-raT4B0doW4GQCvrxwWLlXU"
   
   private headers = new HttpHeaders({
-    'apikey': this.supabaseApiKey,
-    'Authorization': `Bearer ${this.supabaseApiKey}`,
+    'Authorization': `Bearer ${localStorage.getItem('token')}`,
     'Content-Type': 'application/json'
   });
 
@@ -137,42 +133,38 @@ export class RestaurantService {
 
   // Fetch restaurants from Supabase
   getRestaurants(city?: string, name?: string): Observable<Restaurant[]> {
-    // Construct query parameters dynamically based on provided filters
-    let queryParams = '';
-    
+    let url
     if (city) {
-      queryParams += `?location=ilike.${city}`;
+      url = `${environment.apiBaseUrl}/restaurants?city=${city}`;
+    } else if (name) {
+      url = `${environment.apiBaseUrl}/restaurants?name=${name}`;
+    } else {
+      url = `${environment.apiBaseUrl}/restaurants`;
     }
-    
-    if (name) {
-      // If city filter is already applied, append `&`, otherwise start with `?`
-      queryParams += (queryParams ? `&` : `?`) + `name=ilike.${name}`;
-    }
-  
-    return this.http.get<Restaurant[]>(`${this.supabaseUrl}/rest/v1/restaurants${queryParams}`, { headers: this.headers });
+    return this.http.get<Restaurant[]>(url, { headers: this.headers }).pipe(
+      catchError(error => {
+        alert('Get restaurants failed');
+        console.error('Get restaurants failed:', error);
+        return of([]);
+      })
+    );
   }
   
 
-  // Add a new restaurant to Supabase
-  createRestaurant(data: RestaurantCreate): Observable<any> {
-  const newRestaurant = {
-    name: data.name,
-    location: data.location,
-    description: data.description || '',
-    phone: data.phone || '',
-    opening_hours: data.openingHours || '',
-    img: data.img || '' // Use img directly
-  };
-
-  return this.http.post(`${this.supabaseUrl}/rest/v1/restaurants`, newRestaurant, { headers: this.headers });
-}
-
-
-  // Upload image to Supabase Storage
-  uploadImage(file: File): Observable<any> {
-    const formData = new FormData();
-    formData.append('file', file);
-    
-    return this.http.post(`${this.supabaseUrl}/storage/v1/object/sign/restaurant_images/${file.name}`, formData, { headers: this.headers });
+  createRestaurant(data: RestaurantCreate): Observable<NewRestaurant|null> {
+    // Mock: simply push to local array and return it
+    const newRestaurant: NewRestaurant = {
+      name: data.name,
+      location: data.location,
+      phone: data.phone || '',
+      openingHours: data.openingHours || '',
+      img: data.img || '',
+      description: data.description || ''
+    };
+    return this.http.post<NewRestaurant>(`${environment.apiBaseUrl}/restaurants`, newRestaurant, { headers: this.headers }).pipe(
+      catchError(error => {
+        return throwError(() => error)
+      })
+    );
   }
 }
