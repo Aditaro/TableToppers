@@ -1,9 +1,93 @@
 <mat-toolbar color="primary">
   <span>Restaurant Floor Plan</span>
   <span class="spacer"></span>
-  <button mat-button color="accent" (click)="addNewTable()">Add</button>
+  <button color="accent" (click)="addNewTable()">Add</button>
 </mat-toolbar>
-<div class="floor-plan-container">
-    <!-- The container for our Konva Stage -->
-    <div #floorPlanHost class="konva-container"></div>
+<div class="main-container" [ngClass]="{'sidebar-hidden': sidebarHidden}">
+  <div class="sidebar-toggle" (click)="toggleSidebar()">
+    <mat-icon>{{ sidebarHidden ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+  </div>
+  <div class="reservations-sidebar">
+    <h3>Reservations</h3>
+    <mat-form-field appearance="fill">
+      <mat-label>Select Date</mat-label>
+      <input matInput [matDatepicker]="picker" [value]="selectedDate" (dateChange)="onDateSelected($event)">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+    
+    <div class="reservations-list">
+      <!-- Past hours (collapsible) -->
+      <div *ngIf="pastHours.length > 0" class="past-hours-section">
+        <button mat-button (click)="togglePastHours()" class="toggle-past-button">
+          {{ showPastHours ? 'Hide' : 'Show' }} Past Hours ({{pastHours.length}})
+        </button>
+        
+        <div *ngIf="showPastHours" class="past-hours-container">
+          <mat-card *ngFor="let hour of pastHours" [ngClass]="getHourClass(hour)" class="hour-card past-hour-card">
+            <mat-card-header>
+              <mat-card-title>
+                <span>{{formatHour(hour)}}</span>
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content *ngIf="hourlyReservations[hour].length > 0">
+              <div *ngFor="let reservation of hourlyReservations[hour]" class="hour-reservation">
+                <p>Occupancy: {{reservation.numberOfGuests}}</p>
+                <p>Phone: {{reservation.phoneNumber}}</p>
+                <p>Table: {{getTableName(reservation.tableId)}}</p>
+                <p>Status: {{reservation.status}}</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+      
+      <!-- Current and future hours (always visible) -->
+      <mat-card *ngFor="let hour of futureHours" [ngClass]="getHourClass(hour)" class="hour-card">
+        <mat-card-header>
+          <mat-card-title>
+            <span>{{formatHour(hour)}}</span>
+            <span *ngIf="isCurrentHour(hour)" class="current-indicator">Current</span>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content *ngIf="hourlyReservations[hour].length > 0">
+          <div *ngFor="let reservation of hourlyReservations[hour]" class="hour-reservation">
+            <p>Occupancy: {{reservation.numberOfGuests}}</p>
+            <p>Phone: {{reservation.phoneNumber}}</p>
+            <div class="table-assignment">
+              <mat-form-field appearance="fill">
+                <mat-label>Table</mat-label>
+                <mat-select [value]="reservation.tableId" (selectionChange)="onTableSelectionChange(reservation, $event.value)">
+                  <mat-option *ngIf="!reservation.tableId" [value]="null">Select a table</mat-option>
+                  <mat-option *ngFor="let table of getAvailableTablesForReservation(reservation)" [value]="table.id">
+                    {{table.name || 'Table ' + table.id}} (Capacity: {{table.minCapacity}}-{{table.maxCapacity}})
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <p>Status: {{reservation.status}}</p>
+            <div class="reservation-actions">
+              <button mat-button color="warn" *ngIf="reservation.status !== 'cancelled' && reservation.status !== 'completed'" (click)="cancelReservation(reservation)">
+                <mat-icon>cancel</mat-icon> Cancel
+              </button>
+              <button mat-button color="accent" *ngIf="reservation.status !== 'cancelled' && reservation.status !== 'completed'" (click)="modifyReservation(reservation)">
+                <mat-icon>edit</mat-icon> Modify
+              </button>
+              <button mat-button color="primary" *ngIf="reservation.status !== 'cancelled' && reservation.status !== 'completed'" (click)="checkInReservation(reservation)">
+                <mat-icon>check_circle</mat-icon> Check-in
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      
+      <div *ngIf="reservations.length === 0" class="no-reservations">
+        No reservations for this date
+      </div>
+    </div>
+  </div>
+  <div class="floor-plan-container">
+      <!-- The container for our Konva Stage -->
+      <div #floorPlanHost class="konva-container"></div>
+  </div>
 </div>

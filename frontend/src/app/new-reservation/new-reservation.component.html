@@ -49,6 +49,6 @@
       </mat-form-field>
 
       <button mat-raised-button color="primary" type="submit" [disabled]="reservationForm.invalid">
-        Reserve Table
+        {{ isEditMode ? 'Update Reservation' : 'Reserve Table' }}
       </button>
     </form>

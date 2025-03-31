@@ -1,3 +1,41 @@
+/* Page container for sidebar layout */
+.page-container {
+  display: flex;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Sidebar styles */
+.sidebar {
+  min-width: 400px;
+  width: 400px;
+  background-color: #ffffff;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+
+/* Toggle button for sidebar */
+.sidebar-toggle {
+  display: none; /* Hidden by default on large screens */
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 200;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Filter container inside sidebar */
 .filter-container {
   margin: 20px 20px;
   display: flex;
@@ -40,30 +78,24 @@
   white-space: nowrap;
   margin-left: auto; /* This pushes the button to the right */
   margin-right: 20px; /* Add some right margin for spacing */
+  background-color: #2196F3;
 }
 
-@media (max-width: 768px) {
-  .filter-container {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .restaurant-info {
-    margin-right: 0;
-    margin-bottom: 15px;
-    width: 100%;
-  }
-  
-  #new-reservation-btn {
-    align-self: flex-end;
-  }
+/* Main content area */
+.main-content {
+  flex: 1;
+  padding: 20px;
+}
+
+.reservations-container {
+  padding: 20px;
 }
 
 .reservations-card {
   margin-bottom: 15px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  margin: 40px 40px;
+  margin: 0 0 15px 0;
 }
 
 .reservation-content {
@@ -120,4 +152,45 @@
 
 .delete-btn:hover {
   background-color: rgba(244, 67, 54, 0.1);
+}
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .sidebar {
+    position: fixed;
+    height: 100vh;
+    transform: translateX(-100%);
+  }
+  
+  .sidebar.visible {
+    transform: translateX(0);
+  }
+  
+  .sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .filter-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .restaurant-info {
+    margin-right: 0;
+    margin-bottom: 15px;
+    width: 100%;
+  }
+  
+  #new-reservation-btn {
+    align-self: flex-end;
+  }
 }

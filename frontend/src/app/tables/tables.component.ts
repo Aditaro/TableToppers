@@ -13,6 +13,18 @@ import Layer = Konva.Layer;
 import {Subscription} from "rxjs";
 import {NewTableComponent} from "../new-table/new-table.component";
 import {MatDialog} from "@angular/material/dialog";
+import { MatDatepickerInputEvent, MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatInputModule } from '@angular/material/input';
+import { Reservation } from '../models/reservation.model';
+import { ReservationService } from '../services/reservation.service';
+import { MatBadgeModule } from '@angular/material/badge';
+import { RestaurantService } from '../services/restaurant.service';
+import { Restaurant } from '../models/restaurant.model';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
+import { NewReservationComponent } from '../new-reservation/new-reservation.component';
 
 @Component({
   standalone: true,
@@ -22,7 +34,14 @@ import {MatDialog} from "@angular/material/dialog";
     MatCardModule,
     MatToolbarModule,
     MatProgressSpinnerModule,
-    MatIconModule
+    MatIconModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatInputModule,
+    MatBadgeModule,
+    MatExpansionModule,
+    MatButtonModule,
+    MatSelectModule
   ],
   templateUrl: './tables.component.html',
   styleUrl: './tables.component.css',
@@ -31,8 +50,19 @@ export class TablesComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('floorPlanHost', { static: true }) floorPlanHost!: ElementRef<HTMLDivElement>;
 
   restaurantId!: string;
+  restaurant: Restaurant | null = null;
   tables: Table[] = [];
   loading = false;
+  reservations: Reservation[] = [];
+  selectedDate: Date = new Date();
+  hourlyReservations: { [hour: string]: Reservation[] } = {};
+  hours: string[] = [];
+  filteredHours: string[] = [];
+  pastHours: string[] = [];
+  futureHours: string[] = [];
+  currentHour: string = '';
+  showPastHours: boolean = false;
+  sidebarHidden: boolean = false;
 
     // Konva objects
   private stage!: Stage;
@@ -46,6 +76,8 @@ export class TablesComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private route: ActivatedRoute,
     private tablesService: TablesService,
+    private reservationService: ReservationService,
+    private restaurantService: RestaurantService,
     public dialog: MatDialog
   ) {}
 
@@ -53,8 +85,380 @@ export class TablesComponent implements OnInit, OnDestroy, AfterViewInit {
     // 1. Grab restaurantId from route
     this.restaurantId = this.route.snapshot.paramMap.get('restaurantId') || '';
 
-    // 2. Load tables for the restaurant
+    // 2. Load restaurant details
+    this.loadRestaurant();
+
+    // 3. Load tables for the restaurant
     this.loadTables();
+    
+    // 4. Load reservations for today
+    this.loadReservations(this.selectedDate);
+  }
+
+  loadRestaurant() {
+    // Get restaurant details to access opening hours
+    this.restaurantService.getRestaurants(undefined, undefined).subscribe({
+      next: (restaurants) => {
+        const restaurant = restaurants.find(r => r.id === this.restaurantId);
+        if (restaurant) {
+          this.restaurant = restaurant;
+          // If we already have hours loaded, filter them by opening hours
+          if (this.hours.length > 0) {
+            this.filterHoursByOpeningHours();
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching restaurant details:', err);
+      }
+    });
+  }
+
+  loadReservations(date: Date) {
+    this.reservationService.getReservations(this.restaurantId, undefined, date)
+      .subscribe({
+        next: (data) => {
+          this.reservations = data;
+          // Group reservations by hour
+          this.groupReservationsByHour();
+          // Update table colors based on reservations
+          this.updateTableColors();
+        },
+        error: (err) => {
+          console.error('Error fetching reservations:', err);
+        }
+      });
+  }
+  
+  groupReservationsByHour() {
+    // Reset hourly reservations
+    this.hourlyReservations = {};
+    this.hours = [];
+    this.pastHours = [];
+    this.futureHours = [];
+    
+    // Get current hour for highlighting
+    const now = new Date();
+    this.currentHour = now.getHours().toString().padStart(2, '0');
+    
+    // Default opening and closing hours if restaurant data is not available
+    let openHour = 10; // Default opening hour (10 AM)
+    let closeHour = 22; // Default closing hour (10 PM)
+    
+    // Parse opening hours if available
+    if (this.restaurant && this.restaurant.openingHours) {
+      const openingHoursMatch = this.restaurant.openingHours.match(/(\d+):(\d+)-(\d+):(\d+)/);
+      if (openingHoursMatch && openingHoursMatch.length === 5) {
+        openHour = parseInt(openingHoursMatch[1]);
+        closeHour = parseInt(openingHoursMatch[3]);
+      }
+    }
+    
+    // Create slots only from opening hour to one hour before closing
+    for (let i = openHour; i < closeHour -1; i++) {
+      const hour = i.toString().padStart(2, '0');
+      this.hourlyReservations[hour] = [];
+      this.hours.push(hour);
+      
+      // Separate past and future hours
+      if (parseInt(hour) < parseInt(this.currentHour)) {
+        this.pastHours.push(hour);
+      } else {
+        this.futureHours.push(hour);
+      }
+    }
+    
+    // Set filtered hours to be the same as hours since we're already filtering
+    this.filteredHours = [...this.hours];
+    
+    // Group reservations by hour
+    this.reservations.forEach(reservation => {
+      const reservationDate = new Date(reservation.reservationTime);
+      const hour = reservationDate.getHours().toString().padStart(2, '0');
+      
+      if (!this.hourlyReservations[hour]) {
+        this.hourlyReservations[hour] = [];
+      }
+      
+      this.hourlyReservations[hour].push(reservation);
+    });
+  }
+  
+  filterHoursByOpeningHours() {
+    if (!this.restaurant || !this.restaurant.openingHours) return;
+    
+    // Parse opening hours (assuming format like "10:00-22:00")
+    const openingHoursMatch = this.restaurant.openingHours.match(/(\d+):(\d+)-(\d+):(\d+)/);
+    
+    if (openingHoursMatch && openingHoursMatch.length === 5) {
+      const openHour = parseInt(openingHoursMatch[1]);
+      const closeHour = parseInt(openingHoursMatch[3]);
+      
+      // Filter hours to only include those within opening hours
+      this.filteredHours = this.hours.filter(hour => {
+        const hourNum = parseInt(hour);
+        return hourNum >= openHour && hourNum < closeHour;
+      });
+      
+      // Update past and future hours based on filtered hours
+      this.pastHours = this.pastHours.filter(hour => this.filteredHours.includes(hour));
+      this.futureHours = this.futureHours.filter(hour => this.filteredHours.includes(hour));
+    } else {
+      // If parsing fails, use all hours
+      this.filteredHours = this.hours;
+    }
+  }
+  
+  togglePastHours() {
+    this.showPastHours = !this.showPastHours;
+  }
+  
+  onDateSelected(event: MatDatepickerInputEvent<Date>) {
+    if (event.value) {
+      this.selectedDate = event.value;
+      this.loadReservations(this.selectedDate);
+    }
+  }
+  
+  formatHour(hour: string): string {
+    return `${hour}:00`;
+  }
+  
+  isCurrentHour(hour: string): boolean {
+    return hour === this.currentHour;
+  }
+  
+  isPastHour(hour: string): boolean {
+    return parseInt(hour) < parseInt(this.currentHour);
+  }
+  
+  getHourClass(hour: string): string {
+    if (this.isCurrentHour(hour)) {
+      return 'current-hour';
+    }
+    if (this.isPastHour(hour)) {
+      return 'past-hour';
+    }
+    return '';
+  }
+  
+  getTableName(tableId: string): string {
+    const table = this.tables.find(t => t.id === tableId);
+    return table ? (table.name || `Table ${table.id}`) : 'Unknown';
+  }
+
+  // Cancel a reservation
+  cancelReservation(reservation: Reservation) {
+    // Check if the reservation is already checked in (completed)
+    if (reservation.status === 'completed') {
+      alert('Cannot cancel a reservation that has already been checked in.');
+      return;
+    }
+
+    if (confirm(`Are you sure you want to cancel this reservation?`)) {
+      // Update the reservation status to cancelled
+      this.reservationService.updateReservation(
+        this.restaurantId,
+        reservation.id,
+        { status: 'cancelled' }
+      ).subscribe({
+        next: () => {
+          // Update the local reservation status
+          reservation.status = 'cancelled';
+          // Update table colors
+          this.updateTableColors();
+        },
+        error: (err) => {
+          console.error('Error cancelling reservation:', err);
+        }
+      });
+    }
+  }
+
+  // Get available tables for a reservation
+  getAvailableTablesForReservation(reservation: Reservation): Table[] {
+    // Get tables that can accommodate the party size
+    return this.tables.filter(table => 
+      // Include the currently assigned table (if any) or available tables
+      (table.id === reservation.tableId || table.status === 'available') && 
+      table.minCapacity <= reservation.numberOfGuests && 
+      table.maxCapacity >= reservation.numberOfGuests
+    );
+  }
+
+  // Handle table selection change
+  onTableSelectionChange(reservation: Reservation, tableId: string | null) {
+    // If the selected table is the same as the current one, do nothing
+    if (tableId === reservation.tableId) {
+      return;
+    }
+
+    // Check if the reservation is already checked in (completed)
+    if (reservation.status === 'completed') {
+      alert('Cannot change table for a reservation that has already been checked in.');
+      return;
+    }
+
+    // Update the reservation with the new table
+    this.reservationService.updateReservation(
+      this.restaurantId,
+      reservation.id,
+      { 
+        tableId: tableId,
+        status: 'confirmed' 
+      }
+    ).subscribe({
+      next: () => {
+        // Update the local reservation
+        reservation.tableId = tableId;
+        reservation.status = 'confirmed';
+        // Update table colors
+        this.updateTableColors();
+      },
+      error: (err) => {
+        console.error('Error assigning table:', err);
+      }
+    });
+  }
+
+  // Modify a reservation
+  modifyReservation(reservation: Reservation) {
+    // Check if the reservation is already checked in (completed)
+    if (reservation.status === 'completed') {
+      alert('Cannot modify a reservation that has already been checked in.');
+      return;
+    }
+    
+    // Open a dialog to edit the reservation details
+    const dialogRef = this.dialog.open(NewReservationComponent, {
+      width: '500px',
+      data: {
+        restaurant: this.restaurant,
+        restaurantId: this.restaurantId,
+        reservation: reservation
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Reload reservations to get the updated data
+        this.loadReservations(this.selectedDate);
+      }
+    });
+  }
+
+  // Check in a reservation
+  checkInReservation(reservation: Reservation) {
+    // Check if the reservation is already checked in
+    if (reservation.status === 'completed') {
+      alert('This reservation has already been checked in.');
+      return;
+    }
+    
+    // Check if the reservation is cancelled
+    if (reservation.status === 'cancelled') {
+      alert('Cannot check in a cancelled reservation.');
+      return;
+    }
+
+    this.reservationService.updateReservation(
+      this.restaurantId,
+      reservation.id,
+      { status: 'completed' }
+    ).subscribe({
+      next: () => {
+        // Update the local reservation status
+        reservation.status = 'completed';
+        
+        // Find the associated table and update its status to occupied
+        const table = this.tables.find(t => t.id === reservation.tableId);
+        if (table) {
+          table.status = 'occupied';
+          
+          // Update the table status on the server
+          this.tablesService.updateTable(
+            this.restaurantId,
+            table.id,
+            { status: 'occupied' }
+          ).subscribe({
+            next: () => {
+              // Update table colors
+              this.updateTableColors();
+              alert('Reservation checked in successfully!');
+            },
+            error: (err) => {
+              console.error('Error updating table status:', err);
+            }
+          });
+        } else {
+          alert('Reservation checked in successfully!');
+          this.updateTableColors();
+        }
+      },
+      error: (err) => {
+        console.error('Error checking in reservation:', err);
+        alert('Error checking in reservation. Please try again.');
+      }
+    });
+  }
+
+  updateTableColors() {
+    // Get current time
+    const now = new Date();
+    const currentHour = now.getHours().toString().padStart(2, '0');
+    const currentHourReservations = this.hourlyReservations[currentHour] || [];
+    
+    // Find all tables that have reservations for the current hour
+    const reservedTableIds = currentHourReservations
+      .filter(r => r.status !== 'cancelled')
+      .map(r => r.tableId);
+    
+    // Update the local table status
+    this.tables.forEach(table => {
+      // First check if table is occupied by a checked-in reservation
+      const isOccupied = this.reservations
+        .filter(r => r.status === 'completed' && r.tableId === table.id)
+        .length > 0;
+      
+      if (isOccupied) {
+        table.status = 'occupied';
+      } else if (reservedTableIds.includes(table.id)) {
+        // Table has a current hour reservation
+        table.status = 'occupied';
+      } else {
+        // Check if table is reserved within the next 15 minutes
+        const isReservedSoon = this.reservations
+          .filter(r => r.status === 'confirmed' && r.tableId === table.id)
+          .some(r => {
+            const reservationTime = new Date(r.reservationTime);
+            const timeDiff = reservationTime.getTime() - now.getTime();
+            const minutesDiff = timeDiff / (1000 * 60);
+            return minutesDiff <= 15 && minutesDiff > 0;
+          });
+        
+        // Check if table is reserved later today
+        const isReservedLater = this.reservations
+          .filter(r => r.status !== 'cancelled' && r.tableId === table.id)
+          .some(r => {
+            const reservationTime = new Date(r.reservationTime);
+            return reservationTime > now;
+          });
+        
+        if (isReservedSoon) {
+          table.status = 'reserved';
+        } else if (isReservedLater) {
+          table.status = 'reserved';
+        } else {
+          table.status = 'available';
+        }
+      }
+    });
+    
+    // Redraw the tables with updated colors
+    if (this.layer) {
+      this.layer.destroyChildren();
+      this.drawTables();
+    }
   }
 
   ngAfterViewInit() {
@@ -274,7 +678,6 @@ export class TablesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
 
-
   onShapeDragEnd(table: Table, evt: Konva.KonvaEventObject<DragEvent>) {
     const shape = evt.target;
     const newX = shape.x();
@@ -401,6 +804,21 @@ export class TablesComponent implements OnInit, OnDestroy, AfterViewInit {
   });
 }
 
+
+  toggleSidebar() {
+    this.sidebarHidden = !this.sidebarHidden;
+    
+    // Give the DOM time to update before resizing the stage
+    setTimeout(() => {
+      if (this.stage) {
+        // Resize the stage to fit the new container size
+        const containerEl = this.floorPlanHost.nativeElement;
+        this.stage.width(containerEl.offsetWidth);
+        this.stage.height(containerEl.offsetHeight);
+        this.layer.batchDraw();
+      }
+    }, 300); // Match the CSS transition time (0.3s)
+  }
 
   ngOnDestroy() {
     if (this.sub) {
