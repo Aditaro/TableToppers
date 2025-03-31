@@ -220,19 +220,17 @@ func createRestaurant() gin.HandlerFunc {
 	}
 }
 
-// Update Restaurant Handler
+// Update Restaurant Handler (DOES NOT WORK)
 func updateRestaurant() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		var updatedRestaurant RestaurantUpdate
 
-		// Validate and bind JSON input to struct
 		if err := c.ShouldBindJSON(&updatedRestaurant); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input: " + err.Error()})
 			return
 		}
 
-		// Prepare request body for update
 		url := fmt.Sprintf("%s/rest/v1/restaurants?id=eq.%s", os.Getenv("SUPABASE_URL"), id)
 		requestBody, err := json.Marshal(updatedRestaurant)
 		if err != nil {
@@ -240,7 +238,6 @@ func updateRestaurant() gin.HandlerFunc {
 			return
 		}
 
-		// Send PUT request to Supabase API
 		req, err := http.NewRequest("PUT", url, bytes.NewBuffer(requestBody))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request: " + err.Error()})
@@ -254,7 +251,6 @@ func updateRestaurant() gin.HandlerFunc {
 		log.Printf("Request Body: %s", string(requestBody))
 		log.Printf("URL: %s", url)
 
-		// Create HTTP client and send request
 		clientHTTP := &http.Client{}
 		resp, err := clientHTTP.Do(req)
 		if err != nil {
@@ -263,17 +259,255 @@ func updateRestaurant() gin.HandlerFunc {
 		}
 		defer resp.Body.Close()
 
-		// Check response status code
 		if resp.StatusCode != http.StatusOK {
 			c.JSON(resp.StatusCode, gin.H{"error": "Failed to update restaurant, status code: " + fmt.Sprint(resp.StatusCode)})
 			return
 		}
 
-		// Return success response
 		c.JSON(http.StatusOK, gin.H{"message": "Restaurant updated successfully"})
 	}
 }
 
+// Delete Restaurant Handler
+func deleteRestaurant() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+
+		url := fmt.Sprintf("%s/rest/v1/restaurants?id=eq.%s", os.Getenv("SUPABASE_URL"), id)
+
+		req, err := http.NewRequest("DELETE", url, nil)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request: " + err.Error()})
+			return
+		}
+
+		req.Header.Set("apikey", os.Getenv("SUPABASE_ANON_KEY"))
+		req.Header.Set("Authorization", "Bearer "+os.Getenv("SUPABASE_ANON_KEY"))
+		req.Header.Set("Content-Type", "application/json")
+
+		clientHTTP := &http.Client{}
+		resp, err := clientHTTP.Do(req)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send request: " + err.Error()})
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusNoContent {
+			c.JSON(resp.StatusCode, gin.H{"error": "Failed to delete restaurant, status code: " + fmt.Sprint(resp.StatusCode)})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Restaurant deleted successfully"})
+	}
+}
+
+type Table struct {
+	ID           string `json:"id"`
+	RestaurantID string `json:"restaurant_id"`
+	Number       int8   `json:"number"`
+	MinCapacity  int    `json:"min_capacity"`
+	MaxCapacity  int    `json:"max_capacity"`
+	Status       string `json:"status"`
+	X            int    `json:"x"`
+	Y            int    `json:"y"`
+}
+
+type TableCreate struct {
+	RestaurantID string `json:"restaurant_id"`
+	Number       int8   `json:"number" binding:"required"`
+	MinCapacity  int    `json:"min_capacity" binding:"required"`
+	MaxCapacity  int    `json:"max_capacity" binding:"required"`
+	Status       string `json:"status" binding:"required"`
+	X            int    `json:"x"`
+	Y            int    `json:"y"`
+}
+
+// Get Tables for a Specific Restaurant Handler
+func getTables() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		restaurantID := c.Param("id")
+
+		if restaurantID == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "restaurant_id is required"})
+			return
+		}
+
+		url := fmt.Sprintf("%s/rest/v1/tables?restaurant_id=eq.%s", os.Getenv("SUPABASE_URL"), restaurantID)
+
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
+			return
+		}
+
+		req.Header.Set("apikey", os.Getenv("SUPABASE_ANON_KEY"))
+		req.Header.Set("Authorization", "Bearer "+os.Getenv("SUPABASE_ANON_KEY"))
+
+		clientHTTP := &http.Client{}
+		resp, err := clientHTTP.Do(req)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch tables"})
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			c.JSON(resp.StatusCode, gin.H{"error": "Failed to fetch tables"})
+			return
+		}
+
+		var tables []Table
+		if err := json.NewDecoder(resp.Body).Decode(&tables); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse response"})
+			return
+		}
+
+		c.JSON(http.StatusOK, tables)
+	}
+}
+
+func createTable() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		restaurantID := c.Param("id")
+
+		if restaurantID == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "restaurant_id is required"})
+			return
+		}
+
+		var newTable TableCreate
+		if err := c.ShouldBindJSON(&newTable); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input: " + err.Error()})
+			return
+		}
+
+		newTable.RestaurantID = restaurantID
+
+		url := fmt.Sprintf("%s/rest/v1/tables", os.Getenv("SUPABASE_URL"))
+
+		requestBody, err := json.Marshal(newTable)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request body"})
+			return
+		}
+
+		req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
+			return
+		}
+
+		req.Header.Set("apikey", os.Getenv("SUPABASE_ANON_KEY"))
+		req.Header.Set("Authorization", "Bearer "+os.Getenv("SUPABASE_ANON_KEY"))
+		req.Header.Set("Content-Type", "application/json")
+
+		clientHTTP := &http.Client{}
+		resp, err := clientHTTP.Do(req)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create table"})
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusCreated {
+			c.JSON(resp.StatusCode, gin.H{"error": "Failed to create table"})
+			return
+		}
+
+		c.JSON(http.StatusCreated, gin.H{"message": "Table created successfully"})
+	}
+}
+
+// Delete table handler
+func deleteTable() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Extract restaurant_id and table_id from the URL parameters
+		restaurantID := c.Param("id")
+		tableID := c.Param("table_id")
+
+		// Validate restaurant_id and table_id
+		if restaurantID == "" || tableID == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "restaurant_id and table_id are required"})
+			return
+		}
+
+		// Build URL to delete the table for the specific restaurant
+		url := fmt.Sprintf("%s/rest/v1/tables?restaurant_id=eq.%s&id=eq.%s", os.Getenv("SUPABASE_URL"), restaurantID, tableID)
+
+		// Create the DELETE request
+		req, err := http.NewRequest("DELETE", url, nil)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
+			return
+		}
+
+		req.Header.Set("apikey", os.Getenv("SUPABASE_ANON_KEY"))
+		req.Header.Set("Authorization", "Bearer "+os.Getenv("SUPABASE_ANON_KEY"))
+
+		clientHTTP := &http.Client{}
+		resp, err := clientHTTP.Do(req)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete table"})
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusNoContent {
+			c.JSON(resp.StatusCode, gin.H{"error": "Failed to delete table"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Table deleted successfully"})
+	}
+}
+
+/*
+	func updateTable() gin.HandlerFunc {
+		return func(c *gin.Context) {
+			restaurantID := c.Param("restaurantId")
+			tableID := c.Param("tableId")
+			var updatedTable TableUpdate
+
+			if err := c.ShouldBindJSON(&updatedTable); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input: " + err.Error()})
+				return
+			}
+
+			url := fmt.Sprintf("%s/rest/v1/tables?id=eq.%s&restaurantId=eq.%s", os.Getenv("SUPABASE_URL"), tableID, restaurantID)
+			requestBody, err := json.Marshal(updatedTable)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request body"})
+				return
+			}
+
+			req, err := http.NewRequest("PUT", url, bytes.NewBuffer(requestBody))
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
+				return
+			}
+
+			req.Header.Set("apikey", os.Getenv("SUPABASE_ANON_KEY"))
+			req.Header.Set("Authorization", "Bearer "+os.Getenv("SUPABASE_ANON_KEY"))
+			req.Header.Set("Content-Type", "application/json")
+
+			clientHTTP := &http.Client{}
+			resp, err := clientHTTP.Do(req)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send request"})
+				return
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != http.StatusOK {
+				c.JSON(resp.StatusCode, gin.H{"error": "Failed to update table"})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{"message": "Table updated successfully"})
+		}
+	}
+*/
 func main() {
 	loadEnv()
 
@@ -285,13 +519,28 @@ func main() {
 	router := gin.Default()
 	router.Use(cors.Default())
 
+	// User routes
 	router.POST("/register", registerHandler(client))
 	router.POST("/login", loginHandler(client))
 	router.GET("/home", homeHandler())
+
+	// Restaurant routes
 	router.GET("/restaurants", getRestaurants())
 	router.GET("/restaurants/:id", getRestaurants())
 	router.POST("/restaurants", createRestaurant())
 	router.PUT("/restaurants/:id", updateRestaurant())
+	router.DELETE("/restaurants/:id", deleteRestaurant())
+
+	// Table routes
+	router.GET("/restaurants/:id/tables", getTables())
+	router.POST("/restaurants/:id/tables", createTable())
+	router.DELETE("/restaurants/:id/tables/:table_id", deleteTable())
+	router.GET("/restaurants/:id/tables/:table_id", getTables())
+
+	/*
+		router.GET("/restaurants/:id/tables/:tableId", getTables())      // Get details of a specific table
+		router.PUT("/restaurants/:id/tables/:tableId", updateTable())    // Update a specific table
+	*/
 
 	fmt.Println("Server running on port 8080")
 	router.Run(":8080")
