@@ -13,13 +13,11 @@ import {MatDialogActions} from '@angular/material/dialog';
 import { NewReservationComponent } from './new-reservation/new-reservation.component';
 import { ReservationsComponent } from './reservations/reservations.component';
 
-
 @NgModule({
   providers: [
     { provide: LocationStrategy, useClass: HashLocationStrategy }
   ],
   declarations: [
-
     NewTableComponent
   ],
   imports: [

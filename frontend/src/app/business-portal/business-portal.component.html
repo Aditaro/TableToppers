@@ -1,0 +1,97 @@
+<div class="business-portal">
+    <div id="page-wrapper">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Transform Your Restaurant Management</h1>
+                <p>Streamline operations, boost efficiency, and enhance customer experience with our comprehensive table management solution</p>
+                <a href="/register" class="cta-button">Get Started Free</a>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features">
+            <div class="container">
+                <h2>Powerful Features for Modern Restaurants</h2>
+                <div class="features-grid">
+                    <div class="feature-card" *ngFor="let feature of features">
+                        <i [class]="feature.icon"></i>
+                        <h3>{{feature.title}}</h3>
+                        <p>{{feature.description}}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-card" *ngFor="let stat of stats">
+                        <div class="stat-number">{{stat.number}}</div>
+                        <div class="stat-label">{{stat.label}}</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Section -->
+        <section class="demo">
+            <div class="container">
+                <h2>See It In Action</h2>
+                <div class="demo-content">
+                    <div class="demo-text">
+                        <h3>Real-Time Table Management</h3>
+                        <ul>
+                            <li>Interactive table layout visualization</li>
+                            <li>Drag-and-drop table assignment</li>
+                            <li>Instant status updates</li>
+                            <li>Smart wait time predictions</li>
+                        </ul>
+                        <a href="/login" class="secondary-button">Schedule Demo</a>
+                    </div>
+                    <div class="demo-image">
+                        <img src="assets/images/table-management-demo.png" alt="Table Management Demo">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta">
+            <div class="container">
+                <h2>Ready to Transform Your Restaurant?</h2>
+                <p>Join thousands of restaurants already using Table Toppers to streamline their operations</p>
+                <div class="cta-buttons">
+                    <a href="/register" class="cta-button">Start Free Trial</a>
+                    <a href="/contact" class="secondary-button">Contact Sales</a>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Business Features Grid -->
+        <section class="business-features">
+            <div class="container">
+                <h2>Enterprise Table Management Features</h2>
+                <div class="grid-system">
+                    <!-- Feature Cards -->
+                    <div class="feature-card">
+                        <i class="fas fa-chart-network"></i>
+                        <h3>Real-Time Floor Plan</h3>
+                        <p>Drag-and-drop table management with live occupancy tracking</p>
+                    </div>
+                    <div class="feature-card highlight">
+                        <i class="fas fa-robot"></i>
+                        <h3>Future Integration with AI-Powered Seating</h3>
+                        <p>Machine learning optimizes table turnover and party matching</p>
+                    </div>
+                    <!-- Additional feature cards... -->
+                </div>
+            </div>
+        </section>
+
+
+    
+    </div>
+</div> 

@@ -183,7 +183,7 @@
 import { Injectable } from '@angular/core';
 import {catchError, Observable, of, throwError} from 'rxjs';
 import {NewRestaurant, Restaurant, RestaurantCreate} from '../models/restaurant.model';
-import {HttpClient, HttpResponse} from '@angular/common/http';
+import {HttpClient, HttpHeaders, HttpResponse} from '@angular/common/http';
 import {environment} from '../../environments/environment';
 
 @Injectable({
