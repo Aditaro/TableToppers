@@ -20,7 +20,7 @@ export const routes: Routes = [
   { path: 'new-restaurant', component: NewRestaurantComponent, canActivate: [AuthGuard, RoleGuard], data: { expectedRoles: ['manager', 'admin'] } },
   // { path: 'new-reservation', component: NewReservationComponent },
   { path: 'customer-info', component: CustomerInfoComponent, canActivate: [AuthGuard] },
-  { path: 'business-portal', component: BusinessPortalComponent, canActivate: [AuthGuard, RoleGuard], data: { expectedRoles: ['manager', 'admin'] } },
+  { path: 'business-portal', component: BusinessPortalComponent },
   { path: 'restaurants/:restaurantId/tables', component: TablesComponent, canActivate: [AuthGuard, RoleGuard], data: { expectedRoles: ['manager', 'admin'] } },
   { path: 'restaurants/:restaurantId/reserve', component: ReservationsComponent, canActivate: [AuthGuard, RoleGuard], data: { expectedRoles: ['customer'] } },
   { path:'restaurants/:restaurantId/reserve/new', component: NewReservationComponent, canActivate: [AuthGuard, RoleGuard], data: { expectedRoles: ['customer'] } },
