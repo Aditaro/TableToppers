@@ -1,0 +1,59 @@
+<div class="waitlist-container">
+  <h3>Waitlist</h3>
+
+  <button mat-raised-button color="primary" (click)="openAddWaitlistDialog()" class="add-waitlist-btn">
+    Add to Waitlist
+  </button>
+
+  <div *ngIf="waitlist.length === 0" class="empty-waitlist">
+    <p>The waitlist is currently empty.</p>
+  </div>
+
+  <div *ngIf="waitlist.length > 0" class="waitlist-cohorts">
+    <!-- Loop through each cohort -->
+    <mat-accordion>
+      <mat-expansion-panel *ngFor="let cohort of cohorts">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            {{ cohort.name }} ({{ cohort.entries.length }})
+          </mat-panel-title>
+          <mat-panel-description *ngIf="cohort.entries.length > 0">
+            Est. Wait: {{ cohort.waitTime }} mins for last group
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <!-- Cohort content -->
+        <div *ngIf="cohort.entries.length === 0" class="empty-cohort">
+          <p>No groups in this category</p>
+        </div>
+
+        <mat-list *ngIf="cohort.entries.length > 0">
+          <mat-list-item *ngFor="let entry of cohort.entries" [ngClass]="{'seated': entry.status === 'seated', 'cancelled': entry.status === 'cancelled'}">
+            <div class="list-item-content">
+                <span class="entry-title">{{ entry.name }} ({{ entry.partySize }})</span>
+                <div class="waitlist-actions" *ngIf="entry.status === 'waiting'">
+                  <!-- Table selection dropdown -->
+                  <mat-form-field appearance="outline" class="table-select">
+                    <mat-label>Table</mat-label>
+                    <mat-select [(ngModel)]="selectedTableIds[entry.id!]">
+                      <mat-option *ngFor="let table of getAvailableTablesForParty(entry.partySize)" [value]="table.id">
+                        {{ table.name }} ({{ table.minCapacity }}-{{ table.maxCapacity }})
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  
+                  <button mat-icon-button color="primary" (click)="seatCustomer(entry)" [disabled]="!selectedTableIds[entry.id!]" aria-label="Seat Customer">
+                    <mat-icon>event_seat</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" (click)="cancelEntry(entry)" aria-label="Cancel Entry">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </div>
+            </div>
+            
+          </mat-list-item>
+        </mat-list>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+</div>

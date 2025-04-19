@@ -190,7 +190,7 @@ import {environment} from '../../environments/environment';
   providedIn: 'root'
 })
 export class RestaurantService {
-  private apiUrl = "http://localhost:8080";  // Replace with your backend API base URL
+  private apiUrl = environment.apiBaseUrl;
   private headers = new HttpHeaders({
     'Content-Type': 'application/json',
     // You should dynamically add the authentication token if required
