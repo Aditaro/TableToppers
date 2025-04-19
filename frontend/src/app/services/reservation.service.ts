@@ -37,4 +37,19 @@ export class ReservationService {
       const url = `${environment.apiBaseUrl}/restaurants/${restaurantId}/reservations/${reservationId}`;
       return this.http.put(url, reservation);
   }
+
+  /**
+   * Check in a reservation and assign a table
+   * @param restaurantId The restaurant ID
+   * @param reservationId The reservation ID
+   * @param tableId The table ID to assign
+   * @returns Observable of the operation result
+   */
+  checkInReservation(restaurantId: string, reservationId: string, tableId: string): Observable<any> {
+      const url = `${environment.apiBaseUrl}/restaurants/${restaurantId}/reservations/${reservationId}`;
+      return this.http.put(url, { 
+        status: 'confirmed', 
+        tableId: tableId 
+      });
+  }
 }

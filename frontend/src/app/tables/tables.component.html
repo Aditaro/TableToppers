@@ -86,6 +86,7 @@
       </div>
     </div>
   </div>
+  <app-waitlist [restaurantId]="restaurantId" (tableStatusChanged)="updateTableColors()"></app-waitlist>
   <div class="floor-plan-container">
       <!-- The container for our Konva Stage -->
       <div #floorPlanHost class="konva-container"></div>

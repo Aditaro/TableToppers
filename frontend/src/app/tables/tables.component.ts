@@ -25,6 +25,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { NewReservationComponent } from '../new-reservation/new-reservation.component';
+import { WaitlistComponent } from '../waitlist/waitlist.component'; // Import WaitlistComponent
 
 @Component({
   standalone: true,
@@ -41,7 +42,8 @@ import { NewReservationComponent } from '../new-reservation/new-reservation.comp
     MatBadgeModule,
     MatExpansionModule,
     MatButtonModule,
-    MatSelectModule
+    MatSelectModule,
+    WaitlistComponent // Add WaitlistComponent to imports
   ],
   templateUrl: './tables.component.html',
   styleUrl: './tables.component.css',
@@ -403,62 +405,74 @@ export class TablesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateTableColors() {
-    // Get current time
-    const now = new Date();
-    const currentHour = now.getHours().toString().padStart(2, '0');
-    const currentHourReservations = this.hourlyReservations[currentHour] || [];
-    
-    // Find all tables that have reservations for the current hour
-    const reservedTableIds = currentHourReservations
-      .filter(r => r.status !== 'cancelled')
-      .map(r => r.tableId);
-    
-    // Update the local table status
-    this.tables.forEach(table => {
-      // First check if table is occupied by a checked-in reservation
-      const isOccupied = this.reservations
-        .filter(r => r.status === 'completed' && r.tableId === table.id)
-        .length > 0;
-      
-      if (isOccupied) {
-        table.status = 'occupied';
-      } else if (reservedTableIds.includes(table.id)) {
-        // Table has a current hour reservation
-        table.status = 'occupied';
-      } else {
-        // Check if table is reserved within the next 15 minutes
-        const isReservedSoon = this.reservations
-          .filter(r => r.status === 'confirmed' && r.tableId === table.id)
-          .some(r => {
-            const reservationTime = new Date(r.reservationTime);
-            const timeDiff = reservationTime.getTime() - now.getTime();
-            const minutesDiff = timeDiff / (1000 * 60);
-            return minutesDiff <= 15 && minutesDiff > 0;
-          });
+    // First, reload the tables data from the server to ensure we have the latest status
+    this.tablesService.getTables(this.restaurantId).subscribe({
+      next: (updatedTables) => {
+        this.tables = updatedTables;
         
-        // Check if table is reserved later today
-        const isReservedLater = this.reservations
-          .filter(r => r.status !== 'cancelled' && r.tableId === table.id)
-          .some(r => {
-            const reservationTime = new Date(r.reservationTime);
-            return reservationTime > now;
-          });
+        // Get current time
+        const now = new Date();
+        const currentHour = now.getHours().toString().padStart(2, '0');
+        const currentHourReservations = this.hourlyReservations[currentHour] || [];
         
-        if (isReservedSoon) {
-          table.status = 'reserved';
-        } else if (isReservedLater) {
-          table.status = 'reserved';
-        } else {
-          table.status = 'available';
+        // Find all tables that have reservations for the current hour
+        const reservedTableIds = currentHourReservations
+          .filter(r => r.status !== 'cancelled')
+          .map(r => r.tableId);
+        
+        // Update the local table status
+        this.tables.forEach(table => {
+          // First check if table is occupied by a checked-in reservation
+          const isOccupied = this.reservations
+            .filter(r => r.status === 'completed' && r.tableId === table.id)
+            .length > 0;
+          
+          if (isOccupied) {
+            table.status = 'occupied';
+          } else if (reservedTableIds.includes(table.id)) {
+            // Table has a current hour reservation
+            table.status = 'occupied';
+          } else {
+            // Check if table is reserved within the next 15 minutes
+            const isReservedSoon = this.reservations
+              .filter(r => r.status === 'confirmed' && r.tableId === table.id)
+              .some(r => {
+                const reservationTime = new Date(r.reservationTime);
+                const timeDiff = reservationTime.getTime() - now.getTime();
+                const minutesDiff = timeDiff / (1000 * 60);
+                return minutesDiff <= 15 && minutesDiff > 0;
+              });
+            
+            // Check if table is reserved later today
+            const isReservedLater = this.reservations
+              .filter(r => r.status !== 'cancelled' && r.tableId === table.id)
+              .some(r => {
+                const reservationTime = new Date(r.reservationTime);
+                return reservationTime > now;
+              });
+            
+            if (isReservedSoon) {
+              table.status = 'reserved';
+            } else if (isReservedLater) {
+              table.status = 'reserved';
+            } else {
+              table.status = 'available';
+            }
+          }
+        });
+        
+        console.log('Updated tables:', this.tables);
+        
+        // Redraw the tables with updated colors
+        if (this.layer) {
+          this.layer.destroyChildren();
+          this.drawTables();
         }
+      },
+      error: (err) => {
+        console.error('Error fetching updated tables:', err);
       }
     });
-    
-    // Redraw the tables with updated colors
-    if (this.layer) {
-      this.layer.destroyChildren();
-      this.drawTables();
-    }
   }
 
   ngAfterViewInit() {
