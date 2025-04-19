@@ -768,7 +768,75 @@ export class TablesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   editTable(table: Table, group: Konva.Group) {
-  // Open the dialog prepopulated with current table data.
+  // Check if the table is occupied
+  if (table.status === 'occupied') {
+    // Show confirmation dialog to mark customer as completed
+    const confirmResult = confirm('Do you want to mark this customer as completed and free up the table?');
+    if (confirmResult) {
+      // Find the reservation associated with this table
+      const occupiedReservation = this.reservations.find(r => r.tableId === table.id && r.status === 'completed');
+      
+      if (occupiedReservation) {
+        // Update the reservation status to completed (if not already)
+        this.reservationService.updateReservation(
+          this.restaurantId,
+          occupiedReservation.id!,
+          { status: 'completed' }
+        ).subscribe({
+          next: () => {
+            // Update the table status to available
+            this.tablesService.updateTable(
+              this.restaurantId,
+              table.id,
+              { status: 'available' }
+            ).subscribe({
+              next: () => {
+                // Update local table status
+                table.status = 'available';
+                
+                // Update all table colors
+                this.updateTableColors();
+                
+                alert('Customer marked as completed and table is now available.');
+              },
+              error: (err) => {
+                console.error('Failed to update table status:', err);
+                alert('Failed to update table status.');
+              }
+            });
+          },
+          error: (err) => {
+            console.error('Failed to update reservation status:', err);
+            alert('Failed to update reservation status.');
+          }
+        });
+      } else {
+        // If no reservation found, just update the table status
+        this.tablesService.updateTable(
+          this.restaurantId,
+          table.id,
+          { status: 'available' }
+        ).subscribe({
+          next: () => {
+            // Update local table status
+            table.status = 'available';
+
+            // Update all table colors
+            this.updateTableColors();
+            
+            alert('Table is now available.');
+          },
+          error: (err) => {
+            console.error('Failed to update table status:', err);
+            alert('Failed to update table status.');
+          }
+        });
+      }
+    }
+    return;
+  }
+  
+  // If table is not occupied, open the edit dialog as before
   const dialogRef = this.dialog.open(NewTableComponent, {
     width: '300px',
     data: { name: table.name, minCapacity: table.minCapacity, maxCapacity: table.maxCapacity , isEdit: true}
