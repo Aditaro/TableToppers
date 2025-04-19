@@ -34,7 +34,7 @@
                 <div class="waitlist-actions" *ngIf="entry.status === 'waiting'">
                   <!-- Table selection dropdown -->
                   <mat-form-field appearance="outline" class="table-select">
-                    <mat-label>Select Table</mat-label>
+                    <mat-label>Table</mat-label>
                     <mat-select [(ngModel)]="selectedTableIds[entry.id!]">
                       <mat-option *ngFor="let table of getAvailableTablesForParty(entry.partySize)" [value]="table.id">
                         {{ table.name }} ({{ table.minCapacity }}-{{ table.maxCapacity }})
