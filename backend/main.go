@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"mime/multipart"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -23,7 +22,6 @@ type Restaurant struct {
 	OpeningHours string `json:"openingHours,omitempty"`
 	Img          string `json:"img,omitempty"` // Image URL
 }
-
 
 // Load environment variables from a .env file
 func loadEnv() {
@@ -46,7 +44,7 @@ func initSupabase() (*supabase.Client, error) {
 	return client, nil
 }
 
-// Restaurant Image upload
+// Upload image to Supabase storage
 // func uploadImage(client *supabase.Client, fileHeader *multipart.FileHeader) (string, error) {
 // 	file, err := fileHeader.Open()
 // 	if err != nil {
@@ -64,30 +62,14 @@ func initSupabase() (*supabase.Client, error) {
 // 	filePath := "restaurants/" + fileHeader.Filename
 
 // 	// Upload image to Supabase Storage
-// 	_, err = client.Storage.From("restaurant-images").Upload(filePath, &fileBuffer, "image/jpeg")
+// 	_, err = client.Storage.from("restaurant_images").Upload(filePath, &fileBuffer, fileHeader.Header.Get("Content-Type"))
 // 	if err != nil {
 // 		return "", err
 // 	}
 
 // 	// Return public URL of the uploaded image
-// 	return client.Storage.From("restaurant-images").GetPublicURL(filePath), nil
+// 	return client.Storage.from("restaurant_images").GetPublicURL(filePath), nil
 // }
-func uploadImage(file multipart.File, fileHeader *multipart.FileHeader) (string, error) {
-    // Create a client for Supabase storage (replace this with your Supabase client setup)
-    storageClient := supabase.NewClient("YOUR_SUPABASE_URL", "YOUR_SUPABASE_API_KEY")
-    storageBucket := storageClient.Storage.From("restaurant_images")
-
-    // Upload the file to Supabase Storage
-    uploadedFile, err := storageBucket.UploadFile("restaurant_images", file, fileHeader.Filename)
-    if err != nil {
-        return "", err
-    }
-
-    // Return the URL of the uploaded image
-    imgURL := uploadedFile.PublicURL()
-    return imgURL, nil
-}
-
 
 func main() {
 	// Load environment variables
@@ -146,7 +128,7 @@ func main() {
 		}
 
 		// Log in the user using Supabase Auth
-		session, err := client.Auth.SignInWithEmailPassword(request.Email, request.Password) // Correct method
+		session, err := client.Auth.SignInWithEmailPassword(request.Email, request.Password)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
@@ -155,83 +137,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "Login successful", "session": session})
 	})
 
-// 		// POST route to add a restaurant
-// 	router.POST("/restaurants", func(c *gin.Context) {
-// 		var newRestaurant Restaurant
-// 		if err := c.ShouldBindJSON(&newRestaurant); err != nil {
-// 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
-// 			return
-// 		}
-
-// 		// Insert data into Supabase
-// 		query := fmt.Sprintf(`
-// 			INSERT INTO restaurants (name, location, description, phone, opening_hours, img)
-// 			VALUES ('%s', '%s', '%s', '%s', '%s', '%s')
-// 			RETURNING id;
-// 		`, newRestaurant.Name, newRestaurant.Location, newRestaurant.Description,
-// 		newRestaurant.Phone, newRestaurant.OpeningHours, newRestaurant.Img)
-
-// 		var restaurantID string
-// 		err := client.DB.From("restaurants").Execute(query).Scan(&restaurantID)
-// 		if err != nil {
-// 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 			return
-// 		}
-
-// 		newRestaurant.ID = restaurantID
-// 		c.JSON(http.StatusOK, gin.H{"message": "Restaurant added successfully", "restaurant": newRestaurant})
-// 	})
-
-// 	// Route for adding restaurants
-// 	router.POST("/restaurants", func(c *gin.Context) {
-// 		var restaurant Restaurant
-	
-// 		// Parse form data
-// 		if err := c.Request.ParseMultipartForm(10 << 20); err != nil {
-// 			c.JSON(http.StatusBadRequest, gin.H{"error": "File too large"})
-// 			return
-// 		}
-	
-// 		// Get restaurant details
-// 		restaurant.Name = c.PostForm("name")
-// 		restaurant.Location = c.PostForm("location")
-// 		restaurant.Description = c.PostForm("description")
-// 		restaurant.Phone = c.PostForm("phone")
-// 		restaurant.OpeningHours = c.PostForm("openingHours")
-	
-// 		// Handle image upload
-// 		file, fileHeader, err := c.Request.FormFile("img")
-// 		if err == nil { // Image is optional
-// 			defer file.Close()
-// 			imgURL, uploadErr := uploadImage(client, fileHeader)
-// 			if uploadErr != nil {
-// 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Image upload failed"})
-// 				return
-// 			}
-// 			restaurant.Img = imgURL
-// 		}
-	
-// 		// Save restaurant data to Supabase
-// 		_, err = client.From("restaurants").Insert(restaurant, false, "", "", "").Execute()
-// 		if err != nil {
-// 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save restaurant"})
-// 			return
-// 		}
-	
-// 		c.JSON(http.StatusOK, gin.H{"message": "Restaurant added successfully", "restaurant": restaurant})
-// 	})	
-
-// 	// Route for a blank homepage for now
-// 	router.GET("/home", func(c *gin.Context) {
-// 		c.JSON(http.StatusOK, gin.H{"message": "Welcome to the homepage!"})
-// 	})
-
-// 	// Start server
-// 	fmt.Println("Server running on port 8080")
-// 	router.Run(":8080")
-// }
-
-// Single route to handle both restaurant details and image upload
+	// Single route to handle both restaurant details and image upload
 	router.POST("/restaurants", func(c *gin.Context) {
 		var restaurant Restaurant
 
@@ -252,27 +158,26 @@ func main() {
 		file, fileHeader, err := c.Request.FormFile("img")
 		if err == nil { // Image is optional
 			defer file.Close()
-			imgURL, uploadErr := uploadImage(client, fileHeader) // Assuming `uploadImage` uploads the file
+			imgURL, uploadErr := uploadImage(client, fileHeader)
 			if uploadErr != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Image upload failed"})
+				c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Image upload failed: %v", uploadErr)})
 				return
 			}
 			restaurant.Img = imgURL
 		}
 
 		// Save restaurant data to Supabase
-		// Note: Insert method assumes Supabase client is correctly configured
-		_, err = client.From("restaurants").Insert(restaurant, false, "", "", "").Execute()
+		res, err := client.From("restaurants").Insert(restaurant, false, "", "", "").Execute()
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save restaurant"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to save restaurant: %v", err)})
 			return
 		}
 
 		// Return success message with restaurant details
-		c.JSON(http.StatusOK, gin.H{"message": "Restaurant added successfully", "restaurant": restaurant})
+		c.JSON(http.StatusOK, gin.H{"message": "Restaurant added successfully", "restaurant": restaurant, "result": res})
 	})
 
-		// Route for a blank homepage for now
+	// Route for a blank homepage for now
 	router.GET("/home", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "Welcome to the homepage!"})
 	})
@@ -281,6 +186,3 @@ func main() {
 	fmt.Println("Server running on port 8080")
 	router.Run(":8080")
 }
-
-
-
