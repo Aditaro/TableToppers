@@ -551,7 +551,8 @@ func main() {
 	router.GET("/restaurants", getRestaurants())
 	router.GET("/restaurants/:id", getRestaurants())
 	router.POST("/restaurants", createRestaurant())
-	router.PUT("/restaurants/:id", updateRestaurant())
+	// Changed PUT to PATCH for semantic correctness with partial updates
+	router.PATCH("/restaurants/:id", updateRestaurant())
 	router.DELETE("/restaurants/:id", deleteRestaurant())
 
 	// Table routes
