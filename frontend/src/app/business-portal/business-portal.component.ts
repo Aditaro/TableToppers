@@ -1,14 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DemoFormComponent } from '../demo-form/demo-form.component';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-business-portal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DemoFormComponent, RouterModule],
   templateUrl: './business-portal.component.html',
   styleUrls: ['./business-portal.component.css']
 })
 export class BusinessPortalComponent {
+  @ViewChild(DemoFormComponent) demoForm!: DemoFormComponent;
+
   features = [
     {
       title: 'Table Management',
@@ -48,4 +52,8 @@ export class BusinessPortalComponent {
     { number: '25%', label: 'Reduced Wait Times' },
     { number: '90%', label: 'Customer Satisfaction' }
   ];
+
+  openDemoForm() {
+    this.demoForm.openModal();
+  }
 } 

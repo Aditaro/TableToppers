@@ -5,7 +5,7 @@
             <div class="hero-content">
                 <h1>Transform Your Restaurant Management</h1>
                 <p>Streamline operations, boost efficiency, and enhance customer experience with our comprehensive table management solution</p>
-                <a href="/register" class="cta-button">Get Started Free</a>
+                <a routerLink="/subscription" class="cta-button">Get Started Free</a>
             </div>
         </section>
 
@@ -48,10 +48,10 @@
                             <li>Instant status updates</li>
                             <li>Smart wait time predictions</li>
                         </ul>
-                        <a href="/login" class="secondary-button">Schedule Demo</a>
+                        <a (click)="openDemoForm()" class="secondary-button">Schedule Demo</a>
                     </div>
                     <div class="demo-image">
-                        <img src="assets/images/table-management-demo.png" alt="Table Management Demo">
+                        <img _ngcontent-ng-c676898250="" src="assets/css/images/table-managment-demo.gif" alt="Table Management Demo">
                     </div>
                 </div>
             </div>
@@ -63,12 +63,13 @@
                 <h2>Ready to Transform Your Restaurant?</h2>
                 <p>Join thousands of restaurants already using Table Toppers to streamline their operations</p>
                 <div class="cta-buttons">
-                    <a href="/register" class="cta-button">Start Free Trial</a>
-                    <a href="/contact" class="secondary-button">Contact Sales</a>
+                    <a routerLink="/subscription" class="cta-button">Start Free Trial</a>
+                    <a (click)="openDemoForm()" class="secondary-button">Contact Sales</a>
                 </div>
             </div>
         </section>
 
+        <app-demo-form></app-demo-form>
 
         <!-- Business Features Grid -->
         <section class="business-features">
