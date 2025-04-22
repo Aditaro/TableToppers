@@ -1,1 +1,40 @@
-<p>login works!</p>
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h1>Sign In</h1>
+      <p>Welcome back! Please enter your credentials to continue.</p>
+    </div>
+    
+    <form (submit)="onLogin()">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <div class="input-wrapper">
+          <i class="fa fa-envelope"></i>
+          <input type="email" id="email" [(ngModel)]="email" name="email" placeholder="Enter your email" required />
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrapper">
+          <i class="fa fa-lock"></i>
+          <input type="password" id="password" [(ngModel)]="password" name="password" placeholder="Enter your password" required />
+        </div>
+      </div>
+      
+      <div class="form-options">
+        <div class="remember-me">
+          <input type="checkbox" id="remember" name="remember" />
+          <label for="remember">Remember me</label>
+        </div>
+        <a href="#" class="forgot-password">Forgot password?</a>
+      </div>
+      
+      <button type="submit" class="auth-button">Sign In</button>
+    </form>
+    
+    <div class="auth-footer">
+      <p>Don't have an account? <a routerLink="/register">Create Account</a></p>
+    </div>
+  </div>
+</div>

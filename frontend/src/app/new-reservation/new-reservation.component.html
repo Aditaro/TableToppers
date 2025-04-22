@@ -1,0 +1,54 @@
+<form [formGroup]="reservationForm" (ngSubmit)="onSubmit()">
+      <!-- Date Picker -->
+      <mat-form-field appearance="fill">
+        <mat-label>Reservation Date</mat-label>
+        <input matInput 
+              [matDatepicker]="picker" 
+              formControlName="reservationDate"
+              [min]="minDate"
+              [matDatepickerFilter]="dateFilter"
+              placeholder="Choose a date">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error *ngIf="reservationForm.get('reservationDate')?.errors?.['required']">
+          Reservation date is required
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Time Picker -->
+      <mat-form-field appearance="fill">
+        <mat-label>Reservation Time</mat-label>
+        <mat-select formControlName="reservationTime">
+          <mat-option *ngFor="let time of timeSlots" [value]="time">
+            {{ time }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="reservationForm.get('reservationTime')?.errors?.['required']">
+          Reservation time is required
+        </mat-error>
+      </mat-form-field>
+
+      <mat-error *ngIf="reservationForm.errors?.['pastDateTime']">
+        Selected date/time must be in the future and within opening hours
+      </mat-error>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Number of Guests</mat-label>
+        <input matInput type="number" formControlName="numberOfGuests" placeholder="Enter number of guests">
+        <mat-error *ngIf="reservationForm.get('numberOfGuests')?.invalid">
+          Please enter a valid number of guests
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Phone Number</mat-label>
+        <input matInput formControlName="phoneNumber" mask="(000) 000-0000">
+        <mat-error *ngIf="reservationForm.get('phoneNumber')?.invalid">
+          Phone number is required
+        </mat-error>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" type="submit" [disabled]="reservationForm.invalid">
+        {{ isEditMode ? 'Update Reservation' : 'Reserve Table' }}
+      </button>
+    </form>

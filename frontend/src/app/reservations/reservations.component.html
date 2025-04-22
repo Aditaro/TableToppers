@@ -1,0 +1,30 @@
+<div class="filter-container">
+    <div class="restaurant-info" *ngIf="restaurant">
+      <h2>{{ restaurant.name }}</h2>
+      <p><strong>Address:</strong> {{ restaurant.location }}</p>
+      <p><strong>Hours:</strong> {{ restaurant.openingHours }}</p>
+      <p><strong>Phone:</strong> {{ restaurant.phone }}</p>
+      <button type="submit" (click)="openNewReservationDialog()" id="new-reservation-btn">
+        New Reservation
+      </button>
+    </div>
+  </div>
+
+<div class="reservations-container">
+    <mat-card *ngFor="let reservation of reservations" class="reservations-card">
+        <div class="reservation-content">
+            <div class="reservation-details">
+                <p class="reservation-time">{{formatDate(reservation.reservationTime)}}</p>
+                <p class="reservation-guests">{{reservation.numberOfGuests}} guests</p>
+            </div>
+            <div class="reservation-actions">
+                <button class="action-btn edit-btn" (click)="modifyReservation(reservation)" aria-label="Edit Reservation">
+                    <i class="material-icons">edit</i>
+                </button>
+                <button class="action-btn delete-btn" (click)="deleteReservation(reservation)" aria-label="Delete Reservation">
+                    <i class="material-icons">delete</i>
+                </button>
+            </div>
+        </div>
+    </mat-card>
+</div>

@@ -11,19 +11,19 @@ describe('AppComponent', () => {
   it('should create the app', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    expect(app).to.be.ok;
   });
 
-  it(`should have the 'frontend' title`, () => {
+  it(`should have the 'Table Toppers`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('frontend');
+    expect(app.title).equal('Table Toppers');
   });
 
-  it('should render title', () => {
+  it('should render banner', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, frontend');
+    expect(compiled.querySelector('h2')?.textContent).contain('Table Toppers');
   });
 });

@@ -1,0 +1,108 @@
+.waitlist-container {
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-top: 10px;
+  min-width: 430px;
+  max-width: 430px; /* Set a maximum width */
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.add-waitlist-btn {
+  margin-bottom: 15px;
+}
+
+.empty-waitlist {
+  text-align: center;
+  color: #666;
+  margin-top: 20px;
+}
+
+.waitlist-cohorts {
+  margin-top: 20px;
+}
+
+.empty-cohort {
+  text-align: center;
+  color: #666;
+  padding: 10px;
+}
+
+mat-expansion-panel {
+  margin-bottom: 10px;
+}
+
+::ng-deep .mat-expansion-panel-body {
+  padding-bottom: 0;
+}
+
+mat-panel-title {
+  font-weight: 500;
+}
+
+mat-panel-description {
+  color: #f44336; /* Red color for wait time */
+}
+
+mat-list-item {
+  padding: 10px 0;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  min-height: 80px;
+}
+
+mat-list-item:last-child {
+  border-bottom: none;
+}
+
+.waitlist-actions {
+  margin-left: auto; /* Push actions to the right */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table-select {
+  width: 100px;
+  font-size: 12px;
+}
+
+.mat-form-field-wrapper {
+  padding-bottom: 0;
+}
+
+.waitlist-actions button {
+  margin-left: 8px;
+}
+
+.seated {
+  background-color: #e8f5e9; /* Light green background for seated */
+  opacity: 0.7;
+}
+
+.cancelled {
+  background-color: #ffebee; /* Light red background for cancelled */
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.entry-title {
+    font-weight: 500;
+    margin-right: 12px;
+  }
+
+.list-item-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+::ng-deep .table-select .mat-mdc-form-field-subscript-wrapper {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
