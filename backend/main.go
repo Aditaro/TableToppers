@@ -528,6 +528,210 @@ func deleteTable() gin.HandlerFunc {
 	}
 }
 
+/*
+	func updateTable() gin.HandlerFunc {
+		return func(c *gin.Context) {
+			restaurantID := c.Param("restaurantId")
+			tableID := c.Param("tableId")
+			var updatedTable TableUpdate
+
+			if err := c.ShouldBindJSON(&updatedTable); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input: " + err.Error()})
+				return
+			}
+
+			url := fmt.Sprintf("%s/rest/v1/tables?id=eq.%s&restaurantId=eq.%s", os.Getenv("SUPABASE_URL"), tableID, restaurantID)
+			requestBody, err := json.Marshal(updatedTable)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request body"})
+				return
+			}
+
+			req, err := http.NewRequest("PUT", url, bytes.NewBuffer(requestBody))
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
+				return
+			}
+
+			req.Header.Set("apikey", os.Getenv("SUPABASE_ANON_KEY"))
+			req.Header.Set("Authorization", "Bearer "+os.Getenv("SUPABASE_ANON_KEY"))
+			req.Header.Set("Content-Type", "application/json")
+
+			clientHTTP := &http.Client{}
+			resp, err := clientHTTP.Do(req)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send request"})
+				return
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != http.StatusOK {
+				c.JSON(resp.StatusCode, gin.H{"error": "Failed to update table"})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{"message": "Table updated successfully"})
+		}
+	}
+*/
+
+type WaitlistEntry struct {
+	ID                string `json:"id"`
+	RestaurantID      string `json:"restaurant_id"`
+	Name              string `json:"name"`
+	PhoneNumber       string `json:"phone_number"`
+	PartySize         int    `json:"party_size"`
+	PartyAhead        int    `json:"party_ahead"`
+	EstimatedWaitTime int    `json:"estimated_wait_time"`
+	CreatedAt         string `json:"created_at"`
+}
+
+// WaitlistEntryCreate
+type WaitlistEntryCreate struct {
+	RestaurantID      string `json:"restaurant_id"`       // The restaurant the waitlist entry belongs to
+	Name              string `json:"name"`                // Name of the person on the waitlist
+	PhoneNumber       string `json:"phone_number"`        // Contact number of the person
+	PartySize         int    `json:"party_size"`          // The size of the party
+	PartyAhead        int    `json:"party_ahead"`         // Number of parties ahead in the waitlist
+	EstimatedWaitTime int    `json:"estimated_wait_time"` // Estimated wait time in minutes
+}
+
+// Get waitlist entries for a specific restaurant Handler
+func getWaitlist() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		restaurantID := c.Param("id")
+
+		if restaurantID == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "restaurant_id is required"})
+			return
+		}
+
+		url := fmt.Sprintf("%s/rest/v1/waitlist?restaurant_id=eq.%s", os.Getenv("SUPABASE_URL"), restaurantID)
+
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
+			return
+		}
+
+		req.Header.Set("apikey", os.Getenv("SUPABASE_ANON_KEY"))
+		req.Header.Set("Authorization", "Bearer "+os.Getenv("SUPABASE_ANON_KEY"))
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch waitlist entries"})
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			c.JSON(resp.StatusCode, gin.H{"error": "Failed to fetch waitlist entries"})
+			return
+		}
+
+		var entries []WaitlistEntry
+		if err := json.NewDecoder(resp.Body).Decode(&entries); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse response: " + err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, entries)
+	}
+}
+
+// Create waitlist entry for a specific restaurant handler
+func createWaitlistEntry() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		restaurantID := c.Param("id")
+
+		if restaurantID == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "restaurant_id is required"})
+			return
+		}
+
+		var newEntry WaitlistEntryCreate
+		if err := c.ShouldBindJSON(&newEntry); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input: " + err.Error()})
+			return
+		}
+
+		newEntry.RestaurantID = restaurantID
+
+		url := fmt.Sprintf("%s/rest/v1/waitlist", os.Getenv("SUPABASE_URL"))
+
+		requestBody, err := json.Marshal(newEntry)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request body"})
+			return
+		}
+
+		req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
+			return
+		}
+
+		req.Header.Set("apikey", os.Getenv("SUPABASE_ANON_KEY"))
+		req.Header.Set("Authorization", "Bearer "+os.Getenv("SUPABASE_ANON_KEY"))
+		req.Header.Set("Content-Type", "application/json")
+
+		clientHTTP := &http.Client{}
+		resp, err := clientHTTP.Do(req)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create waitlist entry"})
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusCreated {
+			c.JSON(resp.StatusCode, gin.H{"error": "Failed to create waitlist entry"})
+			return
+		}
+
+		c.JSON(http.StatusCreated, gin.H{"message": "Waitlist entry created successfully"})
+	}
+}
+
+// Delete waitlist entry for a specific restaurant Handler
+func deleteWaitlistEntry() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		restaurantID := c.Param("id")
+		entryID := c.Param("entry_id")
+
+		if restaurantID == "" || entryID == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "restaurant_id and entry_id are required"})
+			return
+		}
+
+		url := fmt.Sprintf("%s/rest/v1/waitlist?restaurant_id=eq.%s&id=eq.%s", os.Getenv("SUPABASE_URL"), restaurantID, entryID)
+
+		req, err := http.NewRequest("DELETE", url, nil)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
+			return
+		}
+
+		req.Header.Set("apikey", os.Getenv("SUPABASE_ANON_KEY"))
+		req.Header.Set("Authorization", "Bearer "+os.Getenv("SUPABASE_ANON_KEY"))
+
+		clientHTTP := &http.Client{}
+		resp, err := clientHTTP.Do(req)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete waitlist entry"})
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusNoContent {
+			c.JSON(resp.StatusCode, gin.H{"error": "Failed to delete waitlist entry"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Waitlist entry deleted successfully"})
+	}
+}
+
 func main() {
 	// Load environment variables
 	loadEnv()
@@ -562,12 +766,12 @@ func main() {
 	router.PUT("/restaurants/:id/tables/:table_id", updateTable())
 	router.DELETE("/restaurants/:id/tables/:table_id", deleteTable())
 
-	// Start the server
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8087"
-	}
-	
-	fmt.Printf("Server running on port %s\n", port)
-	router.Run(":" + port)
+	// Waitlist routes
+	router.GET("/restaurants/:id/waitlist", getWaitlist())
+	router.POST("/restaurants/:id/waitlist", createWaitlistEntry())
+	router.DELETE("/restaurants/:id/waitlist/:entry_id", deleteWaitlistEntry())
+
+	fmt.Println("Server running on port 8080")
+	router.Run(":8080")
 }
+
