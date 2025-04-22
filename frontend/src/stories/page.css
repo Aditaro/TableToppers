@@ -22,7 +22,7 @@
 }
 
 .storybook-page a {
-  color: #1ea7fd;
+  color: #800020;
   text-decoration: none;
 }
 
@@ -65,5 +65,5 @@
 }
 
 .storybook-page .tip-wrapper svg path {
-  fill: #1ea7fd;
+  fill: #800020;
 }
