@@ -144,6 +144,36 @@ This section outlines the major accomplishments from each development sprint.
 
 ---
 
+## Key Dependencies
+
+This project relies on several key libraries and frameworks managed by Go modules and npm.
+
+### Backend (Go)
+
+Dependencies are managed using Go Modules (`go.mod` and `go.sum`). Key dependencies include:
+
+* **Go Standard Library:** Utilized extensively for core functionalities (HTTP handling, JSON processing, etc.).
+* **Supabase Go Client (`supabase-go`):** Used for interacting with the Supabase backend (authentication, database operations). *(Verify exact library name if different)*
+* **HTTP Router:** A router library (e.g., `net/http`'s `ServeMux`, `gorilla/mux`, `chi`, or `gin-gonic`) is used to handle API request routing. *(Specify which one if applicable)*
+* **Testing Libraries:** Standard Go testing package, potentially supplemented by assertion libraries (e.g., `stretchr/testify`).
+
+*For a complete list of backend dependencies and their versions, please refer to the `go.mod` file in the backend directory.*
+
+### Frontend (Angular / npm)
+
+Dependencies are managed using npm (`package.json` and `package-lock.json`). Key dependencies include:
+
+* **Angular Framework (`@angular/core`, `@angular/common`, `@angular/router`, etc.):** The core framework for building the SPA.
+* **Angular Material (`@angular/material`):** Component library for UI elements following Material Design principles.
+* **RxJS:** Library for reactive programming using Observables, heavily used within Angular.
+* **TypeScript:** The primary language used for frontend development.
+* **Transloco (`@ngneat/transloco`):** Library for internationalization (i18n).
+* **Jest (`jest`):** Framework for running unit tests.
+* **Cypress (`cypress`):** Framework for running end-to-end tests.
+* **Storybook (`@storybook/angular`):** Tool for developing and showcasing UI components in isolation.
+
+*For a complete list of frontend dependencies (including development dependencies) and their versions, please refer to the `package.json` file in the frontend directory.*
+
 ## Getting Started
 
 ### Prerequisites
