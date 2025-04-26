@@ -1,8 +1,6 @@
-##### Sprint 4 Report 
+# Sprint 4 Report 
 
-### Backend Contributions 
-
-# Waitlist Feature Implementation
+#### Waitlist Feature Implementation
 Implemented GET, POST, and DELETE routes for the waitlist system:
 
 - GET: Get all waitlist entries for a restaurant.
@@ -61,7 +59,7 @@ features is embedded.
 
 ========================================================================
 
-Implemented modals for:
+### Implemented modals for:
 
 - Schedule Demo
 
@@ -76,7 +74,9 @@ subscription level.
 
 ======================================================================
 
-Cypress Testing Addition and passing Cypress tests for:
+### Cypress Testing
+
+Tests for:
 
 Visibility of the business portal and demo GIF.
 
@@ -166,6 +166,7 @@ restaurantID := "059ffaf3-1409-4da1-b1c5-187dda0e27a5"
 
 Expected Server Response: 200
 Expected Output: "Waitlist entry deleted successfully"
+Check data becomes empty after delete
 
 Backend unit tests for tables and restaurant updating.
 
