@@ -81,11 +81,21 @@ Validation of all footer quick links.
 Unit Testing Unit tests for key components were implemented and
 extended:
 
-Backend unit tests for table waitlist GET, POST, and DELETE requests.
+==================================
+
+Backend Unit Tests:
+
+Backend unit tests for waitlist GET, POST, and DELETE requests.
+
+Backend unit tests for tables and restaurant updating.
 
 Backend unit tests for reservation GET, POST, PATCH, and DELETE requests.
 
+All tests implemented use a mocked database and simulate sending the handler being tested and check for proper server response as well as proper actual output of the request.
+
 Full backend API can be found in openapi.yaml, all endpoints implemented except the menu section, which is in our plans for future work.
+
+=================================
 
 Reservation Component: Test form visibility, field input, and submission
 handling.
