@@ -6,22 +6,34 @@ A web application designed for efficient restaurant table reservations and manag
 
 ## Table of Contents
 
-1.  [Key Features](#key-features)
-2.  [Team](#team)
+1.  [Project Goals](#project-goals)
+2.  [Key Features](#key-features)
 3.  [Technology Stack](#technology-stack)
-4.  [Sprint Progress Summary](#sprint-progress-summary)
-    * [Sprint 1: Foundation & Initial User Features](#sprint-1-foundation--initial-user-features)
-    * [Sprint 2: User Authentication & Core Models](#sprint-2-user-authentication--core-models)
-    * [Sprint 3: Core Management & Reservation Features](#sprint-3-core-management--reservation-features)
-    * [Sprint 4: Waitlist, Business Portal & Testing](#sprint-4-waitlist-business-portal--testing)
+4.  [Key Dependencies](#key-dependencies)
 5.  [Getting Started](#getting-started)
     * [Prerequisites](#prerequisites)
     * [Setup](#setup)
 6.  [Running the Application](#running-the-application)
 7.  [Testing](#testing)
 8.  [Docker (Frontend)](#docker-frontend)
-9.  [Development Tools & Features (Frontend)](#development-tools--features-frontend)
-10. [License](#license)
+9.  [API Documentation](#api-documentation)
+10. [Architecture Overview](#architecture-overview)
+11. [Configuration](#configuration)
+12. [Sprint Progress Summary](#sprint-progress-summary)
+    * [Sprint 1: Foundation & Initial User Features](#sprint-1-foundation--initial-user-features)
+    * [Sprint 2: User Authentication & Core Models](#sprint-2-user-authentication--core-models)
+    * [Sprint 3: Core Management & Reservation Features](#sprint-3-core-management--reservation-features)
+    * [Sprint 4: Waitlist, Business Portal & Testing](#sprint-4-waitlist-business-portal--testing)
+13. [Team & Contributions](#team--contributions)
+14. [Future Work](#future-work)
+15. [Contributing](#contributing)
+16. [License](#license)
+
+---
+
+## Project Goals
+
+TableToppers aims to streamline the often frustrating process of restaurant discovery and reservation. We address common pain points for both customers (difficulty finding available tables, opaque waitlist processes) and restaurants (inefficient table management, manual reservation tracking). Our platform provides a seamless interface for Browse, booking, waitlisting, and managing restaurant seating, enhancing convenience and efficiency for everyone involved.
 
 ---
 
@@ -52,15 +64,6 @@ A web application designed for efficient restaurant table reservations and manag
 
 ---
 
-## Team
-
-* **Alex Hu** - Backend Development
-* **Adit Potta** - Backend Development
-* **Hongyu Chen** - Frontend Development
-* **Ian Arnold** - Frontend Development
-
----
-
 ## Technology Stack
 
 * **Backend:** Go, Supabase (Authentication, Database)
@@ -75,72 +78,6 @@ A web application designed for efficient restaurant table reservations and manag
     * ESLint, Prettier, Commit Linting (Code Quality)
     * AuditJS (Security Audits)
     * Auto-Changelog
-
----
-
-## Sprint Progress Summary
-
-This section outlines the major accomplishments from each development sprint.
-
-### Sprint 1: Foundation & Initial User Features
-
-* **Focus:** Setting up the development environment and implementing basic user registration and login.
-* **Completed:**
-    * Backend and Frontend environment setup (Node, Go, Angular CLI, Git, Supabase integration basics).
-    * Initial Backend database schema design.
-    * Frontend landing page development.
-    * Basic structure for User Registration and Login features (partially complete due to auth complexities).
-* **Key User Stories Addressed:** Environment Setup, Landing Page Development, Initial work on Register/Login.
-
-### Sprint 2: User Authentication & Core Models
-
-* **Focus:** Completing the user authentication flow, establishing core backend data models, enabling basic restaurant Browse, and defining user roles.
-* **Completed:**
-    * **Backend:**
-        * Finalized secure User Registration and Login implementation (password hashing, token generation/validation, session handling).
-        * Implemented foundational Role-Based Access Control (RBAC) logic (defining roles like Customer, Staff, Manager).
-        * Defined and implemented core Go structs/models in the backend for Restaurants, Tables, and Users based on Sprint 1 schema design.
-        * Created the initial API endpoint to retrieve a list of all restaurants.
-    * **Frontend:**
-        * Completed User Registration and Login forms with proper input validation and error handling.
-        * Developed basic placeholder pages for logged-in users (e.g., customer profile/dashboard).
-        * Implemented a frontend page to display the list of restaurants fetched from the backend API.
-        * Refined landing page styles and navigation flows post-login.
-* **Key User Stories Addressed:** Fully addressed Register a New User, Login for Existing User; Started Retrieve a List of Restaurants; Established foundations for role-specific access.
-
-### Sprint 3: Core Management & Reservation Features
-
-* **Focus:** Building out core functionalities for restaurant/table management and the customer reservation process.
-* **Completed:**
-    * **Backend:**
-        * Implemented full CRUD API routes for Restaurants and Tables.
-        * Implemented API routes for creating and retrieving Reservations per restaurant.
-        * Added Unit Tests for Restaurant and Table routes using mocked data.
-        * Resolved backend integration issues.
-        * Verified all new endpoints using Postman.
-    * **Frontend:**
-        * Enhanced UI/Navigation (navbar styling, fixed buttons).
-        * Added new pages: "Info" page and "Business Portal".
-        * Implemented Manager/Admin features: Edit tables, view table status, view/add/check-in/cancel reservations.
-        * Implemented Customer features: Create and view personal reservations.
-* **Key User Stories Addressed:** Retrieve Restaurants (filtering), Create Restaurant, Get/Create Tables, Create/Get Reservations (All/Single), various UI/UX improvements for staff/managers.
-
-### Sprint 4: Waitlist, Business Portal & Testing
-
-* **Focus:** Implementing the waitlist feature, enhancing the business-facing portal, and significantly increasing test coverage.
-* **Completed:**
-    * **Backend:**
-        * Implemented full GET, POST, DELETE API routes for the Waitlist feature.
-        * Added comprehensive Unit Tests for Waitlist, Reservation, and remaining Table/Restaurant routes.
-        * Created a detailed backend-specific README file.
-        * Finalized API implementation (excluding planned Menu features), documented in `openapi.yaml`.
-    * **Frontend:**
-        * Developed the Waitlist management component for staff (add customer, assign cohort, estimate wait time, assign table, cancel).
-        * Updated customer-facing pages (new arrivals content, footer links).
-        * Enhanced Business Portal (added demo GIF, modals for contact/demo/trial, pricing tiers, FAQ section).
-        * Added extensive Cypress (E2E) tests for business portal interactions, footer links, etc.
-        * Implemented/Extended Unit Tests (Jest) for Reservation, Restaurant, Table, and Waitlist components.
-* **Key User Stories Addressed:** Join Waitlist, Manage Waitlist (implied staff story), Business Portal enhancements, extensive testing implementation.
 
 ---
 
@@ -174,7 +111,11 @@ Dependencies are managed using npm (`package.json` and `package-lock.json`). Key
 
 *For a complete list of frontend dependencies (including development dependencies) and their versions, please refer to the `package.json` file in the frontend directory.*
 
+---
+
 ## Getting Started
+
+Follow these instructions to set up and run the project locally.
 
 ### Prerequisites
 
@@ -231,7 +172,7 @@ You'll typically need to run both the backend and frontend services simultaneous
         ```bash
         go run main.go
         ```
-    * The backend API server should start, listening on a configured port (check backend code/config for the specific port).
+    * The backend API server should start, listening on a configured port (check backend code/config for the specific port, often `8080`).
 
 2.  **Run the Frontend Application (Angular):**
     * Ensure you are in the frontend directory.
