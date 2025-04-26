@@ -17,44 +17,46 @@ via Postman.
 
 Readme Setup I created a full README.md for the backend that describes:
 
-Prerequisites and environmental setup.
+- Prerequisites and environmental setup.
 
-Run the backend server configuration.
+- Run the backend server configuration.
 
-Availability of API routes and examples.
+- Availability of API routes and examples.
 
-Backend Routes and Unit Testing. Restauration/table route testing
+- Backend Routes and Unit Testing. Restauration/table route testing
 continues.
 
-Validated API functionality using Postman and unit testing.
+- Validated API functionality using Postman and unit testing.
 
-Main functionality was added and tested - data updates (e.g. table
+- Main functionality was added and tested - data updates (e.g. table
 status) are processed correctly.
 
-Frontend Contributions Waitlist Component A UI component was developed
+- Frontend Contributions Waitlist Component A UI component was developed
 to allow staff to manage waitlisted customers.
+
+========================================================================================
 
 Key features include:
 
-Enter customer name, party size and phone number in input form.
+- Enter customer name, party size and phone number in input form.
 
-Automatic cohort assignment is based on party size.
+- Automatic cohort assignment is based on party size.
 
-Figure showing estimated wait time calculation along with cohort
+- Figure showing estimated wait time calculation along with cohort
 information.
 
-You can assign a table to a waiting customer and cancel their waitlist
+- You can assign a table to a waiting customer and cancel their waitlist
 status.
 
-The UI updates when waitlist status changes.
+- The UI updates when waitlist status changes.
 
-Customer-Facing Updates Filler text and images were replaced by New
+- Customer-Facing Updates Filler text and images were replaced by New
 Arrivals for newly opened restaurants or dishes.
 
-Updated footer quick links to redirect to appropriate customer pages
+- Updated footer quick links to redirect to appropriate customer pages
 (e.g. Info tab).
 
-Business Portal Enhancements A GIF demonstration of table management
+- Business Portal Enhancements A GIF demonstration of table management
 features is embedded.
 
 ========================================================================
@@ -75,24 +77,82 @@ subscription level.
 ======================================================================
 
 ### Cypress Testing
+Tests for:  
+  
+- Visibility of the business portal and demo GIF.  
+  
+- Triggering demo/contact modals properly.  
+  
+- Submission of demos is required.  
+  
+- Navigate to the subscription page.  
+  
+- Validation of all footer quick links.  
+  
+navbar.cy.ts  
+  
+Navigation Bar  
+1. Should display all main navigation items 
+o	Visit /  
+o	Assert the following items are visible in #nav ul:  
+-	Business Portal  
+-	Restaurants  
+-	Login  
+-	Register  
+2. Should navigate to correct pages when clicking links   
+o	Click Restaurants → expect URL to include /restaurants  
+o	Click Login → expect URL to include /login  
+o	Click Register → expect URL to include /register  
+o	Click Business Portal → expect URL to include /business-portal  
+________________________________________
+business-portal.cy.ts  
+  
+Business Portal Page  
+1. Should display the business portal page correctly   
+o	Visit /business-portal  
+o	Assert .business-portal exists  
+o	Assert h1 contains "Transform Your Restaurant Management"  
+2. Should display and play the demo GIF ✅  
+o	Visit /business-portal  
+o	Assert img.demo-image:  
+-	Is visible  
+-	Has src="assets/css/images/table-managment-demo.gif"  
+-	Has alt="Table Management Demo"  
+3. Should open demo form modal when clicking "Schedule Demo"   
+o	Click Schedule Demo  
+o	Assert .modal-overlay and .modal-content are visible  
+4. Should open demo form modal when clicking "Contact Sales"   
+o	Click Contact Sales  
+o	Assert .modal-overlay and .modal-content are visible  
+5. Should be able to fill out and submit the demo form   
+o	Click Schedule Demo  
+o	Fill out:  
+-	#name: "Test User"  
+-	#email: "test@example.com"  
+-	#phone: "1234567890"  
+-	#company: "Test Company"  
+-	#message: "This is a test message"  
+o	Assert .submit-button is not disabled  
+o	Click submit  
+o	Assert .success-message is visible  
+6. Should navigate to subscription page when clicking "Get Started Free"  
+o	Click Get Started Free  
+o	Expect URL to include /subscription  
+7. Should navigate to subscription page when clicking "Start Free Trial"   
+o	Click Start Free Trial  
+o	Expect URL to include /subscription  
+________________________________________
+Home Page Navigation  
+1. Should navigate to login page when clicking "More Info"   
+o	Click More Info (.button.alt)  
+o	Expect URL to include:  
+-	/login  
+-	returnUrl=%2Fcustomer-info  
+2. Should navigate to login page when clicking "Reserve Now"   
+o	Click Reserve Now (.button)  
+o	Expect URL to include /login
 
-Tests for:
-
-Visibility of the business portal and demo GIF.
-
-Triggering demo/contact modals properly.
-
-Submission of demos is required.
-
-Navigate to the subscription page.
-
-Validation of all footer quick links.
-
-Unit Testing Unit tests for key components were implemented and
-extended:
-
-==================================
-
+======================================================================
 ### Backend Unit Tests:  
   
 Backend unit tests for waitlist GET, POST, and DELETE requests.  
