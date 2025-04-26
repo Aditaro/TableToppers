@@ -81,6 +81,12 @@ Validation of all footer quick links.
 Unit Testing Unit tests for key components were implemented and
 extended:
 
+Backend unit tests for table waitlist GET, POST, and DELETE requests.
+
+Backend unit tests for reservation GET, POST, PATCH, and DELETE requests.
+
+Full backend API can be found in openapi.yaml, all endpoints implemented except the menu section, which is in our plans for future work.
+
 Reservation Component: Test form visibility, field input, and submission
 handling.
 
