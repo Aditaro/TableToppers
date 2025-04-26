@@ -93,87 +93,87 @@ extended:
 
 ==================================
 
-### Backend Unit Tests:
+### Backend Unit Tests:  
+  
+Backend unit tests for waitlist GET, POST, and DELETE requests.  
+TestGetWaitlist  
+Mock data for waitlist entries  
+{  
+		{  
+			ID:                "34f156e9-22d4-4507-85a2-aadd843ac251",  
+			RestaurantID:      "059ffaf3-1409-4da1-b1c5-187dda0e27a5",  
+			Name:              "John Doe",  
+			PhoneNumber:       "1234567890",  
+			PartySize:         4,  
+			PartyAhead:        2,  
+			EstimatedWaitTime: 15,  
+			CreatedAt:         "2025-04-21T12:34:56Z",  
+		},  
+		{  
+			ID:                "ae5c0877-995f-43e1-8724-f81d16c38ef2",  
+			RestaurantID:      "70336dc8-0764-432c-882c-033c2b0eac65",  
+			Name:              "Jane Smith",  
+			PhoneNumber:       "0987654321",  
+			PartySize:         2,  
+			PartyAhead:        1,  
+			EstimatedWaitTime: 10,  
+			CreatedAt:         "2025-04-21T13:00:00Z",  
+		},  
+	}  
+Expected Server Response: 200  
+Expected Output:   
+{  
+		{  
+			ID:                "34f156e9-22d4-4507-85a2-aadd843ac251",  
+			RestaurantID:      "059ffaf3-1409-4da1-b1c5-187dda0e27a5",  
+			Name:              "John Doe",  
+			PhoneNumber:       "1234567890",  
+			PartySize:         4,  
+			PartyAhead:        2,  
+			EstimatedWaitTime: 15,  
+			CreatedAt:         "2025-04-21T12:34:56Z",  
+		},  
+		{  
+			ID:                "ae5c0877-995f-43e1-8724-f81d16c38ef2",  
+			RestaurantID:      "70336dc8-0764-432c-882c-033c2b0eac65",  
+			Name:              "Jane Smith",  
+			PhoneNumber:       "0987654321",  
+			PartySize:         2,  
+			PartyAhead:        1,  
+			EstimatedWaitTime: 10,  
+			CreatedAt:         "2025-04-21T13:00:00Z",  
+		},  
+	}  
 
-Backend unit tests for waitlist GET, POST, and DELETE requests.
-TestGetWaitlist
-Mock data for waitlist entries
-{
-		{
-			ID:                "34f156e9-22d4-4507-85a2-aadd843ac251",
-			RestaurantID:      "059ffaf3-1409-4da1-b1c5-187dda0e27a5",
-			Name:              "John Doe",
-			PhoneNumber:       "1234567890",
-			PartySize:         4,
-			PartyAhead:        2,
-			EstimatedWaitTime: 15,
-			CreatedAt:         "2025-04-21T12:34:56Z",
-		},
-		{
-			ID:                "ae5c0877-995f-43e1-8724-f81d16c38ef2",
-			RestaurantID:      "70336dc8-0764-432c-882c-033c2b0eac65",
-			Name:              "Jane Smith",
-			PhoneNumber:       "0987654321",
-			PartySize:         2,
-			PartyAhead:        1,
-			EstimatedWaitTime: 10,
-			CreatedAt:         "2025-04-21T13:00:00Z",
-		},
-	}
-Expected Server Response: 200
-Expected Output: 
-{
-		{
-			ID:                "34f156e9-22d4-4507-85a2-aadd843ac251",
-			RestaurantID:      "059ffaf3-1409-4da1-b1c5-187dda0e27a5",
-			Name:              "John Doe",
-			PhoneNumber:       "1234567890",
-			PartySize:         4,
-			PartyAhead:        2,
-			EstimatedWaitTime: 15,
-			CreatedAt:         "2025-04-21T12:34:56Z",
-		},
-		{
-			ID:                "ae5c0877-995f-43e1-8724-f81d16c38ef2",
-			RestaurantID:      "70336dc8-0764-432c-882c-033c2b0eac65",
-			Name:              "Jane Smith",
-			PhoneNumber:       "0987654321",
-			PartySize:         2,
-			PartyAhead:        1,
-			EstimatedWaitTime: 10,
-			CreatedAt:         "2025-04-21T13:00:00Z",
-		},
-	}
-
-TestCreateWaitlistEntry:
-Mock data for creating a waitlist entry
-  {
-		RestaurantID:      "059ffaf3-1409-4da1-b1c5-187dda0e27a5",
-		Name:              "John Doe",
-		PhoneNumber:       "1234567890",
-		PartySize:         4,
-		PartyAhead:        2,
-		EstimatedWaitTime: 15,
-	}
-Expected Server Response: 201
-Expected Output: "Waitlist entry created successfully"
-Check that resulting data is nonempty.
-
-TestDeleteWaitlistEntry
-Mock Delete info:
-waitlistID := "34f156e9-22d4-4507-85a2-aadd843ac251"
-restaurantID := "059ffaf3-1409-4da1-b1c5-187dda0e27a5"
-
-Expected Server Response: 200
-Expected Output: "Waitlist entry deleted successfully"
-Check data becomes empty after delete
-
-Backend unit tests for tables and restaurant updating.
-
-Backend unit tests for reservation GET, POST, PATCH, and DELETE requests.
-
-Full backend API can be found in openapi.yaml, all endpoints implemented except the menu section, which is in our plans for future work.
-
+TestCreateWaitlistEntry:  
+Mock data for creating a waitlist entry  
+  {  
+		RestaurantID:      "059ffaf3-1409-4da1-b1c5-187dda0e27a5",  
+		Name:              "John Doe",  
+		PhoneNumber:       "1234567890",  
+		PartySize:         4,  
+		PartyAhead:        2,  
+		EstimatedWaitTime: 15,  
+	}  
+Expected Server Response: 201  
+Expected Output: "Waitlist entry created successfully"  
+Check that resulting data is nonempty.  
+  
+TestDeleteWaitlistEntry  
+Mock Delete info:  
+waitlistID := "34f156e9-22d4-4507-85a2-aadd843ac251"  
+restaurantID := "059ffaf3-1409-4da1-b1c5-187dda0e27a5"  
+  
+Expected Server Response: 200  
+Expected Output: "Waitlist entry deleted successfully"  
+Check data becomes empty after delete  
+  
+Backend unit tests for tables and restaurant updating.  
+  
+Backend unit tests for reservation GET, POST, PATCH, and DELETE requests.  
+  
+Full backend API can be found in openapi.yaml, all endpoints implemented except the menu section, which is in our plans for future work.  
+  
 =================================
 
 ### Frontend Unit Tests:
