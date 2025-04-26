@@ -30,13 +30,12 @@ continues.
 
 - Main functionality was added and tested - data updates (e.g. table
 status) are processed correctly.
-
-- Frontend Contributions Waitlist Component A UI component was developed
-to allow staff to manage waitlisted customers.
-
 ========================================================================================
 
+### Frontend Contributions Waitlist Component A UI component
+
 Key features include:
+- allow staff to manage waitlisted customers.  
 
 - Enter customer name, party size and phone number in input form.
 
@@ -153,6 +152,24 @@ o	Click Reserve Now (.button)
 o	Expect URL to include /login
 
 ======================================================================
+
+### Frontend Unit Tests:
+
+Reservation Component: Test form visibility, field input, and submission
+handling.
+
+Restaurant Component: Input for new restaurant creation is validated.
+
+Waitlist Component: Validates waitlist data fetching and cohort sorting,
+form dialog display, table availability display, and estimated wait time
+logic.
+
+Table Component: Testing initialization behavior, floor plan visibility,
+and interaction with reservation list toggle.
+
+
+======================================================================
+
 ### Backend Unit Tests:  
   
 Backend unit tests for waitlist GET, POST, and DELETE requests.  
@@ -232,20 +249,8 @@ Backend unit tests for tables and restaurant updating.
   
 Backend unit tests for reservation GET, POST, PATCH, and DELETE requests.  
   
-Full backend API can be found in openapi.yaml, all endpoints implemented except the menu section, which is in our plans for future work.  
+#### Full backend API can be found in openapi.yaml, all endpoints implemented except the menu section, which is in our plans for future work.  
   
-=================================
 
-### Frontend Unit Tests:
 
-Reservation Component: Test form visibility, field input, and submission
-handling.
 
-Restaurant Component: Input for new restaurant creation is validated.
-
-Table Component: Testing initialization behavior, floor plan visibility,
-and interaction with reservation list toggle.
-
-Waitlist Component: Validates waitlist data fetching and cohort sorting,
-form dialog display, table availability display, and estimated wait time
-logic.
